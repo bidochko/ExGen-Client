@@ -5,21 +5,36 @@ body {
   width: 100%;
 	height: 100%;
 	overflow: hidden;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 /* Main font */
 p {
-  font-family: 'Ubuntu', sans-serif;
+  font-family: 'Ubuntu';
+  font-style: normal;
+  font-weight: normal;
+  font-size: 20px;
+  line-height: normal;
+  text-align: center;
 }
-/* ExGen logo at top */
-.logo {
-  border:none;
-  position: relative;
-  width: 235px;
-  height: 87px;
+.menu {
   margin-left: auto;
   margin-right: auto;
-  top: 0px;
-  background: url("exgen_small.png");
+  border: none;
+  width: 435px;
+  display: flex;
+  justify-content: space-around;
+}
+/* ExGen logo at top */
+img {
+  border:none;
+  position: relative;
+  width: 300px;
+  height: 87px;
+  left: 50%;
+  margin-left: -150px;
+  top: 8px;
 }
 /*Blue bars*/
 .barbluetop {

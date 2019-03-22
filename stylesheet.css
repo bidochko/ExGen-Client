@@ -19,12 +19,44 @@ p {
   text-align: center;
 }
 .menu {
+  position: relative;
+  margin-top: 0px;
   margin-left: auto;
   margin-right: auto;
   border: none;
+  top: 15px;
   width: 435px;
+  height: 30px;
   display: flex;
   justify-content: space-around;
+}
+.menucurrent {
+  background-color: #00A8A5;
+  border: none;
+  border-radius: 0px 0px 10px 10px;
+  height: 30px;
+  color: black;
+  padding: 15px 32px;
+}
+.menucurrent span {
+  cursor: pointer;
+  display: inline-block;
+  position: relative;
+  top: -32px;
+}
+.menubutton {
+  background-color: transparent;
+  border: none;
+  border-radius: 0px 0px 10px 10px;
+  height: 30px;
+  color: black;
+  padding: 15px 32px;
+}
+.menubutton span {
+  cursor: pointer;
+  display: inline-block;
+  position: relative;
+  top: -32px;
 }
 /* ExGen logo at top */
 img {

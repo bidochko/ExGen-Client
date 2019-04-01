@@ -1,5 +1,6 @@
 from app import application
 from flask import Flask, render_template, redirect, request, send_from_directory, url_for, session, flash
+from functools import wraps
 
 #Password Hashing
 from passlib.hash import sha256_crypt
@@ -21,6 +22,25 @@ import os
 #Secret key, tbh I don't know what this does but it complains when I dont set one
 SECRET_KEY = os.urandom(32)
 application.config['SECRET_KEY'] = SECRET_KEY
+
+# Login authentication
+def login_required(f):
+    @wraps(f) #wrapper
+    def wrap(*args, **kwargs):
+        if 'logged_in' in session:
+            return f(*args, **kwargs)
+        else:
+            return redirect(url_for('index')) #Return to login page
+    return wrap
+
+#Logout
+@application.route("/logout/")
+@login_required
+def logout():
+    session.clear()
+    gc.collect()
+    return redirect(url_for('index'))
+
 
 #Index / Login
 @application.route('/', methods=['GET', 'POST'])
@@ -97,22 +117,27 @@ def cookies():
     return render_template("cookies.html")
 #Student Home
 @application.route("/home/", methods=['GET', 'POST'])
+@login_required
 def home():
     return render_template("studenthome.html")
 #Student Exams
 @application.route("/exams/", methods=['GET', 'POST'])
+@login_required
 def exams():
     return render_template("studentexams.html")
 #Student Results
 @application.route("/results/", methods=['GET', 'POST'])
+@login_required
 def results():
     return render_template("studentresults.html")
 #Student Settings
 @application.route("/settings/", methods=['GET', 'POST'])
+@login_required
 def settings():
     return render_template("studentsettings.html")
 
 @application.route("/hashing/")
+@login_required
 def hashing():
     slt = "testing"
     hash1 = sha256_crypt.using(salt=slt).hash("password")

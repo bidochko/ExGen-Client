@@ -37,9 +37,9 @@ def login_required(f):
 @application.route("/logout/")
 @login_required
 def logout():
-    session.clear()
-    gc.collect()
-    return redirect(url_for('index'))
+    session.clear() #clear session info
+    gc.collect() #garbage collector
+    return redirect(url_for('index')) #return user to index
 
 
 #Index / Login
@@ -55,25 +55,27 @@ def index():
                 hash = row[2] # 3rd column is the hashed password
                 salt = row[3] # 4th column is the salt
 
-            #'$5$rounds=555000$'+ salt + '$' + hash
-            formattedhash = "$5$rounds=555000$" + salt + "$" + hash
-            if sha256_crypt.verify(request.form['password'], formattedhash):
-                session['logged_in'] = True
-                session['username'] = request.form['username']
-                return redirect(url_for("home"))
+            formattedhash = "$5$rounds=555000$" + salt + "$" + hash #formatted password for .verify function
+            if sha256_crypt.verify(request.form['password'], formattedhash): #successful login
+                session['logged_in'] = True #set session as logged in
+                session['username'] = request.form['username'] #set username as username session
+                return redirect(url_for("home")) #redirect user to /home
             else:
                 error = "Incorrect credentials"
         gc.collect()
-        conn.close()
-        return render_template("login.html", error=error)
+        conn.close() #close database connection
+        return render_template("login.html", error=error) #refresh with error
     except Exception as e:
         error = "Incorrect credentials"
-        return render_template("login.html", error = error)
+        return render_template("login.html", error = error) #refresh with error
 
-#Register
+
+
+
+#Register Form
 class RegistrationForm(Form):
-    name = TextField("Full Name", [validators.Length(min=1, max=128)])
-    username = TextField("Email", [validators.Length(min=1, max=128)])
+    name = TextField("Full Name", [validators.Required(), validators.Length(min=1, max=128)])
+    username = TextField("Email", [validators.Required(), validators.Length(min=1, max=128)])
     password = PasswordField("Password", [validators.Required(), validators.Length(min=8, max=128), validators.EqualTo('confirm', message='Passwords must match')])
     confirm = PasswordField('Re-enter password')
     accept_tos = BooleanField('I accept giving away my soul', [validators.Required()])
@@ -111,10 +113,19 @@ def register():
     except Exception as e:
         return(str(e))
 
+
+
 #Cookies
 @application.route("/cookies/", methods=['GET', 'POST'])
 def cookies():
     return render_template("cookies.html")
+
+#Redirect 404
+@application.errorhandler(404)
+def handle_404(e):
+    return redirect(url_for('index'))
+
+
 #Student Home
 @application.route("/home/", methods=['GET', 'POST'])
 @login_required

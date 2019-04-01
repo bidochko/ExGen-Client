@@ -10,7 +10,7 @@
 <body>
 	<div class="reg" align="center">
     <img src="{{url_for('static', filename='exgen.png')}}"/>
-		{% from "_formhelpers.html" import render_field %}
+		{% from "_formmacro.html" import render_field %}
 		<form action="/register/" method="POST">
 			<dl>
         {{render_field(form.name, placeholder="Full Name", onfocus="this.placeholder = ''", onblur="this.placeholder = 'Full Name'")}}

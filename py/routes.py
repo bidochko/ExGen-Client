@@ -5,16 +5,14 @@ from flask import Flask, render_template, redirect, request, send_from_directory
 from passlib.hash import sha256_crypt
 
 #Flask Form
-from flask_wtf import Form
-from wtforms import TextField, PasswordField, BooleanField, SubmitField
-from wtforms import validators
+from flask_wtf import FlaskForm
+from wtforms import Form, validators, TextField, PasswordField, BooleanField, SubmitField
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo, Length
 
-#Get rid of this when SQLAlchemy is working
+#SQL Injection prevention
 from MySQLdb import escape_string as thwart
 #SQLAlchemy
 from sqlalchemy import create_engine
-#from dbconnect import connection
 
 #Garbace collection and OS
 import gc
@@ -38,7 +36,7 @@ class RegistrationForm(Form):
     confirm = PasswordField('Re-enter password')
     accept_tos = BooleanField('I accept giving away my soul', [validators.Required()])
 
-@application.route('/register/', methods=["GET", "POST"])
+@application.route('/register/', methods=["GET","POST"])
 def register():
     try:
         form = RegistrationForm(request.form)
@@ -49,18 +47,17 @@ def register():
             slt = "hahamemelol"
             password = sha256_crypt.using(salt=slt).hash((str(form.password.data)))
 
-            engine = create_engine('mysql://root@localhost/')
+            engine = create_engine('mysql://exgensql:yKH2T&%u~L5<@localhost/ExGenDB')
             conn = engine.connect()
-
             trans = conn.begin()
             try:
-                conn.execute("INSERT INTO User (UserName, Hash, Salt, Type) VALUES ('Hahameme', 'Test', 'help', 'notfun')")
-                conn.execute(User.insert(), col2='Hahameme', col3='Test', col4='help', col5='notfun')
+                type = "student"
+                conn.execute("INSERT INTO User (UserName, Hash, Salt, Type) VALUES (%s, %s, %s, %s)", (thwart(username), thwart(password), slt, type))
                 trans.commit()  # transaction is not committed yet
             except:
                 trans.rollback() # this rolls back the transaction unconditionally
 
-            flash("Thank you for registering.")
+            flash("Thanks for Registering!")
             conn.close()
             gc.collect()
 
@@ -98,8 +95,4 @@ def settings():
 def hashing():
     slt = "hahamemelol"
     hash = sha256_crypt.using(salt="hahamemelol").hash("password")
-    if sha256_crypt.verify("Password", hash):
-        meme = "True"
-    else:
-        meme = "False"
-    return meme
+    return hash

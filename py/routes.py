@@ -93,20 +93,21 @@ def register():
             password = password.split("$")[4]
 
             conn, trans = connect()
-            try:
-                type = "student"
-                conn.execute("INSERT INTO User (UserName, Hash, Salt, Type) VALUES (%s, %s, %s, %s)", (thwart(username), thwart(password), randomSalt, type))
-                trans.commit()  # transaction is not committed yet
-            except:
-                trans.rollback() # this rolls back the transaction unconditionally
-
-            flash("Thanks for Registering!")
+            counter = 0
+            x = conn.execute("SELECT * from User where UserName = %s", thwart(username))
+            for row in x:
+                counter += 1
+            if counter > 0:
+                return render_template('register.html', form=form)
+            else:
+                try:
+                    type = "student"
+                    conn.execute("INSERT INTO User (UserName, Hash, Salt, Type) VALUES (%s, %s, %s, %s)", (thwart(username), thwart(password), randomSalt, type))
+                    trans.commit()  # transaction is not committed yet
+                except:
+                    trans.rollback() # this rolls back the transaction unconditionally
             conn.close()
             gc.collect()
-
-            session['logged_in'] = True
-            session['username'] = username
-
             return redirect(url_for('index'))
         return render_template("register.html", form=form)
 

@@ -32,8 +32,12 @@ def index():
         if request.method == "POST": #user presses "login"
             data = conn.execute("SELECT * from User where UserName = %s", thwart(request.form['username']))
             for row in data:
-                hash = row[2] # 3rd collum is the hashed password
-            if sha256_crypt.verify(request.form['password'], hash): #
+                hash = row[2] # 3rd column is the hashed password
+                salt = row[3] # 4th column is the salt
+
+            #'$5$rounds=555000$'+ salt + '$' + hash
+            formattedhash = "$5$rounds=555000$" + salt + "$" + hash
+            if sha256_crypt.verify(request.form['password'], formattedhash):
                 session['logged_in'] = True
                 session['username'] = request.form['username']
                 return redirect(url_for("home"))
@@ -64,6 +68,7 @@ def register():
             username = form.username.data
             randomSalt = createSalt()
             password = sha256_crypt.encrypt((str(form.password.data)), salt=randomSalt, rounds=555000)
+            password = password.split("$")[4]
 
             conn, trans = connect()
             try:

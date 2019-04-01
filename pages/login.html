@@ -1,0 +1,28 @@
+<html>
+  <head>
+    <title>ExGen Login</title>
+    <link rel="shortcut icon" href="{{url_for("static", filename="favicon.png")}}" type="image/x-icon">
+    <link rel="stylesheet" type="text/css" href="{{url_for("static", filename="css/login.css")}}">
+    <meta charset="utf-8">
+  </head>
+  <body>
+    <div class="login">
+      <div align="center">
+        <img src="{{url_for('static', filename='exgen.png')}}"/>
+        <form autocomplete="off" action="" method="post">
+          <input type="text" placeholder="Email" onfocus="this.placeholder = ''" onblur="this.placeholder = 'Email'" name="username" value="{{request.form.username}}">
+          <input type="password" placeholder="Password" onfocus="this.placeholder = ''" onblur="this.placeholder = 'Password'" name="password" value="{{request.form.password}}">
+          <input class="btn btn-default" type="submit" value="Login">
+        </form>
+      </div>
+      {% if error %}
+        <div class="invalid">
+          <p><b>Error: </b>{{ error }}</p>
+        </div>
+      {% endif %}
+    </div>
+    <div class="register">
+      <a href="/home"><button>Register</button></a>
+    </div>
+  </body>
+</html>

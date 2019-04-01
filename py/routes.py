@@ -11,8 +11,7 @@ from wtforms.validators import ValidationError, DataRequired, Email, EqualTo, Le
 
 #SQL Injection prevention
 from MySQLdb import escape_string as thwart
-#SQLAlchemy
-from sqlalchemy import create_engine
+from dbconnect import connect
 
 #Garbace collection and OS
 import gc
@@ -26,13 +25,30 @@ application.config['SECRET_KEY'] = SECRET_KEY
 @application.route('/index', methods=['GET', 'POST'])
 def index():
     error = ''
-    return render_template('login.html', error=error)
+    try:
+        conn, trans = connect()
+        if request.method == "POST":
+            data = conn.execute("SELECT * from User where UserName = %s", thwart(request.form['username']))
+            for row in data:
+                hash = row[2]
+            if sha256_crypt.using(salt="hahamemelol").verify(request.form['password'], hash):
+                session['logged_in'] = True
+                session['username'] = request.form['username']
+                return redirect(url_for("home"))
+            else:
+                error = "Incorrect credentials"
+        gc.collect()
+        conn.close()
+        return render_template("login.html", error=error)
+    except Exception as e:
+        error = "Incorrect credentials"
+        return render_template("login.html", error = error)
 
 #Register
 class RegistrationForm(Form):
     name = TextField("Full Name", [validators.Length(min=1, max=128)])
     username = TextField("Email", [validators.Length(min=1, max=128)])
-    password = PasswordField("Password", [validators.Required(), validators.EqualTo('confirm', message='Passwords must match')])
+    password = PasswordField("Password", [validators.Required(), validators.Length(min=8, max=128), validators.EqualTo('confirm', message='Passwords must match')])
     confirm = PasswordField('Re-enter password')
     accept_tos = BooleanField('I accept giving away my soul', [validators.Required()])
 
@@ -47,9 +63,7 @@ def register():
             slt = "hahamemelol"
             password = sha256_crypt.using(salt=slt).hash((str(form.password.data)))
 
-            engine = create_engine('mysql://exgensql:yKH2T&%u~L5<@localhost/ExGenDB')
-            conn = engine.connect()
-            trans = conn.begin()
+            conn, trans = connect()
             try:
                 type = "student"
                 conn.execute("INSERT INTO User (UserName, Hash, Salt, Type) VALUES (%s, %s, %s, %s)", (thwart(username), thwart(password), slt, type))
@@ -64,7 +78,7 @@ def register():
             session['logged_in'] = True
             session['username'] = username
 
-            return redirect(url_for('home'))
+            return redirect(url_for('index'))
         return render_template("register.html", form=form)
 
     except Exception as e:
@@ -93,6 +107,6 @@ def settings():
 
 @application.route("/hashing/")
 def hashing():
-    slt = "hahamemelol"
-    hash = sha256_crypt.using(salt="hahamemelol").hash("password")
+    slt = "testing"
+    hash = sha256_crypt.using(salt=slt).hash("password")
     return hash

@@ -32,9 +32,9 @@ p2 {
 input[type=text] {
   position: relative;
   border: none;
-  width: 400px;
+  width: 450px;
   height: 25px;
-  left: -40px;
+  left: -45px;
   margin: 0px 0;
   font-family: 'Ubuntu';
   font-style: normal;
@@ -47,9 +47,9 @@ input[type=password] {
   position: relative;
   border: none;
   top: 15px;
-  width: 400px;
+  width: 450px;
   height: 25px;
-  left: -40px;
+  left: -45px;
   margin: 0px 0;
   font-family: 'Ubuntu';
   font-style: normal;
@@ -61,7 +61,7 @@ input[type=password] {
 input[type="checkbox"] {
   position: relative;
   top: 25px;
-  left: -40px;
+  left: -21px;
 }
 input[type=submit] {
   position: relative;
@@ -93,17 +93,17 @@ input[type=submit] {
 img {
   border:none;
   position: relative;
-  width: 261px;
-  height: 88px;
+  width: 320px;
+  height: 108px;
   top: 8px;
 }
 .reg {
   position:absolute;
-  width: 400px;
+  width: 450px;
   height: 400px;
   left: 50%;
   top:50%;
-  margin:-200px 0 0 -200px;
+  margin:-225px 0 0 -225px;
 }
 dd {
   width: 400px;

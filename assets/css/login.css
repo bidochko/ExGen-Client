@@ -1,0 +1,120 @@
+@import url('https://fonts.googleapis.com/css?family=Ubuntu');
+/* Main body */
+body {
+  background-color: #FFFFFF;
+  width: 100%;
+	height: 100%;
+	overflow: hidden;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+/* Main font */
+p {
+  font-family: 'Ubuntu';
+  font-style: normal;
+  font-weight: normal;
+  font-size: 20px;
+  line-height: normal;
+  text-align: center;
+}
+input[type=text] {
+  position: relative;
+  top: 22px;
+  border: none;
+  //border: 2px solid #00A8A5;
+  //border-radius: 5px;
+  width: 400px;
+  height: 25px;
+  margin: 0px 0;
+  font-family: 'Ubuntu';
+  font-style: normal;
+  font-weight: normal;
+  font-size: 20px;
+  line-height: normal;
+  text-align: center;
+}
+input[type=password] {
+  position: relative;
+  top: 28px;
+  border: none;
+  //border: 2px solid #00A8A5;
+  //border-radius: 5px;
+  width: 400px;
+  height: 25px;
+  margin: 0px 0;
+  font-family: 'Ubuntu';
+  font-style: normal;
+  font-weight: normal;
+  font-size: 20px;
+  line-height: normal;
+  text-align: center;
+}
+input[type=submit] {
+  position: relative;
+  top: 45px;
+  background-color: #00A8A5;
+  border: none;
+  border-radius: 5px 5px 5px 5px;
+  color: black;
+  padding: 3px 25px;
+  font-family: 'Ubuntu';
+  font-style: normal;
+  font-weight: normal;
+  font-size: 20px;
+  line-height: normal;
+  text-align: center;
+  vertical-align: middle;
+}
+::placeholder {
+  font-family: 'Ubuntu';
+  font-style: normal;
+  font-weight: normal;
+  font-size: 20px;
+  line-height: normal;
+  text-align: center;
+  color: black;
+  opacity: 1;
+}
+/* ExGen logo at top */
+img {
+  border:none;
+  position: relative;
+  width: 320px;
+  height: 108px;
+  top: 8px;
+}
+.login {
+  position:absolute;
+  width: 400px;
+  height: 400px;
+  left: 50%;
+  top:50%;
+  margin:-200px 0 0 -200px;
+}
+.invalid {
+  position: relative;
+  top: 50px;
+}
+.register {
+  position: relative;
+  top: 15px;
+  float: right;
+  left: -15px;
+}
+button {
+  position: absolute;
+  position: relative;
+  background-color: #00A8A5;
+  border: none;
+  border-radius: 5px 5px 5px 5px;
+  color: black;
+  padding: 3px 25px;
+  font-family: 'Ubuntu';
+  font-style: normal;
+  font-weight: normal;
+  font-size: 20px;
+  line-height: normal;
+  text-align: center;
+  vertical-align: middle;
+}

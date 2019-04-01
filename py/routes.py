@@ -1,16 +1,22 @@
 from app import application
 from flask import Flask, render_template, redirect, request, send_from_directory, url_for, session, flash
 
+#Password Hashing
 from passlib.hash import sha256_crypt
 
-from MySQLdb import escape_string as thwart
-from dbconnect import connection
-
+#Flask Form
 from flask_wtf import Form
 from wtforms import TextField, PasswordField, BooleanField, SubmitField
 from wtforms import validators
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo, Length
 
+#Get rid of this when SQLAlchemy is working
+from MySQLdb import escape_string as thwart
+#SQLAlchemy
+from sqlalchemy import create_engine
+#from dbconnect import connection
+
+#Garbace collection and OS
 import gc
 import os
 
@@ -21,6 +27,7 @@ application.config['SECRET_KEY'] = SECRET_KEY
 @application.route('/', methods=['GET', 'POST'])
 @application.route('/index', methods=['GET', 'POST'])
 def index():
+    error = ''
     return render_template('login.html', error=error)
 
 #Register
@@ -41,30 +48,26 @@ def register():
             username = form.username.data
             slt = "hahamemelol"
             password = sha256_crypt.using(salt=slt).hash((str(form.password.data)))
-            c, conn = connection()
 
-            #MySQL
-            x = c.execute("SELECT * FROM User WHERE UserName = (%s)", (thwart(username)))
+            engine = create_engine('mysql://root@localhost/')
+            conn = engine.connect()
 
-            if int(x) > 0:
-                flash("Email is already taken")
-                return render_template('register.html', form=form)
-            else:
-                type = "student"
-                c.execute("INSERT INTO User (UserName, Hash, Salt, Type) VALUES (%s, %s, %s, %s)", (thwart(username)), (thwart(password)), slt, type)
+            trans = conn.begin()
+            try:
+                conn.execute("INSERT INTO User (UserName, Hash, Salt, Type) VALUES ('Hahameme', 'Test', 'help', 'notfun')")
+                conn.execute(User.insert(), col2='Hahameme', col3='Test', col4='help', col5='notfun')
+                trans.commit()  # transaction is not committed yet
+            except:
+                trans.rollback() # this rolls back the transaction unconditionally
 
-                conn.commit()
+            flash("Thank you for registering.")
+            conn.close()
+            gc.collect()
 
-                flash("Thank you for registering.")
-                print("Did that work?")
-                c.close()
-                conn.close()
-                gc.collect()
+            session['logged_in'] = True
+            session['username'] = username
 
-                session['logged_in'] = True
-                session['username'] = username
-
-                return redirect(url_for('home'))
+            return redirect(url_for('home'))
         return render_template("register.html", form=form)
 
     except Exception as e:

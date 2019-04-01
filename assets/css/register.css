@@ -29,7 +29,40 @@ p2 {
   line-height: normal;
   text-align: center;
 }
+.errors {
+  position: relative;
+  left: 420;
+  color: red;
+  font-family: 'Ubuntu';
+  font-style: normal;
+  font-weight: normal;
+  font-size: 20px;
+  line-height: normal;
+  text-align: left;
+}
+.namepos {
+  position: relative;
+  top: -23px;
+}
+.emailpos {
+  position: relative;
+  top: -24px;
+}
+.passwordpos {
+  position: relative;
+  top: -9px;
+}
+.confirmpos {
+  position: relative;
+  top: 16px;
+}
+.tospos {
+  position: relative;
+  top: -5px;
+}
+
 input[type=text] {
+  background-color: transparent;
   position: relative;
   border: none;
   width: 450px;
@@ -44,6 +77,7 @@ input[type=text] {
   text-align: center;
 }
 input[type=password] {
+  background-color: transparent;
   position: relative;
   border: none;
   top: 15px;
@@ -59,9 +93,10 @@ input[type=password] {
   text-align: center;
 }
 input[type="checkbox"] {
+  background-color: transparent;
   position: relative;
-  top: 25px;
-  left: -21px;
+  top: 22px;
+  left: -42px;
 }
 input[type=submit] {
   position: relative;
@@ -99,14 +134,14 @@ img {
 }
 .reg {
   position:absolute;
-  width: 450px;
+  width: 600px;
   height: 400px;
   left: 50%;
   top:50%;
-  margin:-225px 0 0 -225px;
+  margin:-300px 0 0 -300px;
 }
 dd {
-  width: 400px;
+  width: 600px;
   height: 25px;
   left: 100px;
 }

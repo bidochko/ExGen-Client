@@ -1,11 +1,27 @@
 {% macro render_field(field) %}
   <dd>{{ field(**kwargs)|safe }}
     {% if field.errors %}
-      <ul class=errors>
+      <div class=errors>
         {% for error in field.errors %}
-          <li><p>{{ error }}</p></li>
+          {% if field.name == "name" %}
+            <div class="namepos"><i>Name field is required</i></div>
+          {% endif %}
+          {% if field.name == "username" %}
+            <div class="emailpos"><i>Email field is required</i></div>
+          {% endif %}
+          {% if field.name == "password" %}
+            {% if error == "Field must be between 8 and 128 characters long." %}
+              <div class="passwordpos"><i>Password must be at least 8 characters</i></div>
+            {% endif %}
+            {% if error == "Passwords must match" %}
+              <div class="passwordpos"><i>Those passwords didn't match</i></div>
+            {% endif %}
+          {% endif %}
+          {% if field.name == "accept_tos" %}
+            <div class="tospos"><i>You need to accept</i></div>
+          {% endif %}
         {% endfor %}
-      </ul>
+      </div>
     {% endif %}
   </dd>
 {% endmacro %}

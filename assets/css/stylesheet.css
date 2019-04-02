@@ -82,6 +82,18 @@ img {
   margin-left: -150px;
   top: 8px;
 }
+.username {
+  position: relative;
+  top: -78px;
+  float: right;
+  left: 80px;
+  font-family: 'Ubuntu';
+  font-style: normal;
+  font-weight: normal;
+  font-size: 20px;
+  line-height: normal;
+  text-align: right;
+}
 .logout {
   position: relative;
   top: -14px;

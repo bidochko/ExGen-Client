@@ -23,10 +23,16 @@
         {{render_field(form.accept_tos)}}
       </dl>
 			<input type=submit value=Register>
+      {% with messages = get_flashed_messages() %}
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert alert-info alert-dismissible" role="alert">
+              <p3>{{message}}</p3>
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
 		</form>
-		{% if error %}
-			<p class="error"><strong>Error:</strong> {{error}}</p>
-		{% endif %}
 	</div>
 </body>
 {% endblock %}

@@ -29,6 +29,17 @@ p2 {
   line-height: normal;
   text-align: center;
 }
+p3 {
+  position: relative;
+  top: 25px;
+  font-family: 'Ubuntu';
+  font-style: normal;
+  font-weight: normal;
+  font-size: 20px;
+  line-height: normal;
+  text-align: center;
+  color: red;
+}
 .errors {
   position: relative;
   left: 420;

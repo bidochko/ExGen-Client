@@ -33,6 +33,16 @@ def login_required(f):
             return redirect(url_for('index')) #Return to login page
     return wrap
 
+# Logged out requirenment -> cant log in when already logged in
+def logout_required(f):
+    @wraps(f) #wrapper
+    def wrap(*args, **kwargs):
+        if 'logged_in' in session:
+            return redirect(url_for('home')) #Return to login page
+        else:
+            return f(*args, **kwargs)
+    return wrap
+
 #Logout
 @application.route("/logout/")
 @login_required
@@ -45,6 +55,7 @@ def logout():
 #Index / Login
 @application.route('/', methods=['GET', 'POST'])
 @application.route('/index', methods=['GET', 'POST'])
+@logout_required
 def index():
     error = '' #temp definition
     try:
@@ -81,6 +92,7 @@ class RegistrationForm(Form):
     accept_tos = BooleanField('I accept giving away my soul', [validators.Required()])
 
 @application.route('/register/', methods=["GET","POST"])
+@logout_required
 def register():
     try:
         form = RegistrationForm(request.form)

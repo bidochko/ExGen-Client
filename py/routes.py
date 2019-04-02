@@ -98,6 +98,7 @@ def register():
             for row in x:
                 counter += 1
             if counter > 0:
+                flash("Email is already registered")
                 return render_template('register.html', form=form)
             else:
                 try:
@@ -147,12 +148,3 @@ def results():
 @login_required
 def settings():
     return render_template("studentsettings.html")
-
-@application.route("/hashing/")
-@login_required
-def hashing():
-    slt = "testing"
-    hash1 = sha256_crypt.using(salt=slt).hash("password")
-    slt2 = "woahman"
-    hash2 = sha256_crypt.using(salt=slt2).hash("password")
-    return hash2

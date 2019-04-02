@@ -11,7 +11,7 @@
 	<div class="reg" align="center">
     <img src="{{url_for('static', filename='exgen.png')}}"/>
 		{% from "_formmacro.html" import render_field %}
-		<form action="/register/" method="POST">
+		<form action="/register/" autocomplete="off" method="POST">
 			<dl>
         {{render_field(form.name, placeholder="Full Name", onfocus="this.placeholder = ''", onblur="this.placeholder = 'Full Name'")}}
         {{render_field(form.username, placeholder="Email", onfocus="this.placeholder = ''", onblur="this.placeholder = 'Email'")}}

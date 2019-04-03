@@ -19,5 +19,16 @@
     </div>
     <div class="logout"><a href="/logout"><button class="logoutbutton"><span><p>Logout</p></span></button></a></div>
     <div class="username">{{ session.username }}</div>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        {% for message in messages %}
+          <div class="flashed">
+            <div class="alert alert-info alert-dismissible" role="alert">
+              <p>{{message}}</p>
+            </div>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
   </body>
 </html>

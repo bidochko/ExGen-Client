@@ -18,6 +18,13 @@ p {
   line-height: normal;
   text-align: center;
 }
+p2 {
+  font-family: 'Ubuntu';
+  font-style: normal;
+  font-weight: normal;
+  font-size: 18px;
+  text-align: center;
+}
 .menu {
   position: relative;
   margin-top: 0px;
@@ -116,4 +123,32 @@ img {
   left: 0px;
   top: 96px;
   background: #00A8A5;
+}
+.flashed {
+  position: absolute;
+  top: 19px;
+  left: 40px;
+  font-family: 'Ubuntu';
+  font-style: normal;
+  font-weight: normal;
+  font-size: 20px;
+  line-height: normal;
+  text-align: left;
+}
+.home {
+  position: relative;
+  margin-top: 0px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 1000px;
+}
+.quote {
+  position: relative;
+  top: 70px;
+  height: 195px;
+}
+.registered {
+  position: relative;
+  text-align: left;
+  height: 300px;
 }

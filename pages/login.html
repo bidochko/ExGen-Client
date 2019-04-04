@@ -14,15 +14,13 @@
           <input type="password" placeholder="Password" onfocus="this.placeholder = ''" onblur="this.placeholder = 'Password'" name="password" value="{{request.form.password}}">
           <input class="btn btn-default" type="submit" value="Login">
         </form>
+        <a href="/register"><button class="register">Register</button></a>
       </div>
       {% if error %}
         <div class="invalid">
           <p>{{ error }}</p>
         </div>
       {% endif %}
-    </div>
-    <div class="register">
-      <a href="/register"><button>Register</button></a>
     </div>
   </body>
 </html>

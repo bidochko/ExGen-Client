@@ -38,7 +38,7 @@ def logout_required(f):
     @wraps(f) #wrapper
     def wrap(*args, **kwargs):
         if 'logged_in' in session:
-            return redirect(url_for('home')) #Return to login page
+            return redirect(url_for('home')) #Return to home page
         else:
             return f(*args, **kwargs)
     return wrap

@@ -93,6 +93,7 @@ img {
 .invalid {
   position: relative;
   top: 70px;
+  left: 68px;
 }
 .login {
   position:absolute;

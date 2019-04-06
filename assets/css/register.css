@@ -53,11 +53,15 @@ p3 {
 }
 .namepos {
   position: relative;
-  top: -23px;
+  top: -26px;
 }
 .emailpos {
   position: relative;
-  top: -24px;
+  top: -26px;
+}
+.idpos {
+  position: relative;
+  top: -27px;
 }
 .passwordpos {
   position: relative;

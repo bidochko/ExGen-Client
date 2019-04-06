@@ -37,6 +37,26 @@
       </div>
       <div class="registered">
         <p2><b>Registered Modules</b></p2>
+        <div class="table-responsive">
+          <table class="table" id="modules">
+            <thead>
+              <tr>
+                <th scope="col"><p2><b>Course code</b></p2></th>
+                <th scope="col"><p2><b>Course name</b></p2></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for module in modules %}
+                {% for row in module %}
+                  <tr id={{ row[0] }}>
+                    <th scope="row"><p2>{{ row[3] }}</p2></th>
+                    <td><p2>{{ row[1] }}</p2></td>
+                  </tr>
+                {% endfor %}
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
 

@@ -137,7 +137,7 @@ img {
 }
 .home {
   position: relative;
-  margin-top: 0px;
+  top: 15px;
   margin-left: auto;
   margin-right: auto;
   width: 1000px;
@@ -151,4 +151,19 @@ img {
   position: relative;
   text-align: left;
   height: 300px;
+}
+.table-responsive {
+  position: relative;
+  left:50%;
+  top: 20px;
+  margin-left: -200px;
+}
+th {
+  height:24px;
+}
+td {
+  text-align: center;
+}
+th {
+   text-align: center;
 }

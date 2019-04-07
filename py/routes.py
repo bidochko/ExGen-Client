@@ -164,41 +164,50 @@ def home():
 
 
 
+#Form for the buttons
 class ModuleForm(Form):
+    #variable names used in html
     opt_in_course_code = TextField("")
     opt_out_course_code = TextField("")
 
 @application.route("/modules/", methods=['GET', 'POST'])
 @login_required
 def modules():
-    conn, trans = connect()
-    moduleids = conn.execute("SELECT * FROM StudentModule WHERE StudentID = {}".format(session['studentid']))
-    modules_reg = tuple(conn.execute("SELECT * FROM Module WHERE ModuleID = {}".format(x[1])) for x in moduleids)
-    modules_available = conn.execute("SELECT * FROM Module")
+    conn, trans = connect() #Connect to MySQL
+    modules_available = conn.execute("SELECT * FROM Module") #Get all modules
 
-    try:
-        form = ModuleForm(request.form)
-        if request.method == "POST" and form.validate():
-            if 'opt_out_course_code' in request.form:
-                module_code = form.opt_out_course_code.data
-                for row in modules_available:
-                    if row[3] == module_code:
-                        module_id = row[0]
-                conn.execute("DELETE FROM StudentModule WHERE StudentID=%s AND ModuleID=%s", (session['studentid'], module_id))
-                trans.commit()
-            elif 'opt_in_course_code' in request.form:
-                module_code = form.opt_in_course_code.data
-                meme = "test"
-                for row in modules_available:
-                    if row[3] == module_code:
-                        module_id = row[0]
-                        meme = "changed"
+    form = ModuleForm(request.form)                      #Form for the opt-in/out buttons
+    if request.method == "POST" and form.validate():     #if button is pressed
+        if 'opt_out_course_code' in request.form:        #Opt-out button was pressed
+            module_code = form.opt_out_course_code.data  #Get module button id
+            for row in modules_available:                #Getting module_id from COMPXXX
+                if row[3] == module_code:
+                    module_id = row[0]
+            conn.execute("DELETE FROM StudentModule WHERE StudentID=%s AND ModuleID=%s", (session['studentid'], module_id)) #Delete query from StudentModule table
+            trans.commit() #Commit transaction
+        elif 'opt_in_course_code' in request.form:
+            module_code = form.opt_in_course_code.data #same as above but for opt-in
+            meme = "test"
+            for row in modules_available:
+                if row[3] == module_code:
+                    module_id = row[0]
+
+            #here we need to check if the student is already optted into the chosen module
+            #What would be better here would be if we only display true available modules
+            student_modules = conn.execute("SELECT * FROM StudentModule WHERE StudentID = {}".format(session['studentid'])) #get students registered modules
+            already_added = False #boolean for check
+            for module in student_modules: #loop through all and check if module_id is in this list
+                if module[1] == module_id:
+                    already_added = True
+            if already_added == False:
+                #If module is not in the list, add it to the list
                 conn.execute("INSERT INTO StudentModule VALUES (%s, %s)", (session['studentid'], module_id))
                 trans.commit()
             else:
-                return "not work"
-    except:
-        return render_template("studentmodule.html", modules_reg=modules_reg, modules_available=modules_available)
+                #Flash an error message otherwise
+                flash("Module already added")
+
+    #Get registered modules and available modules
     moduleids = conn.execute("SELECT * FROM StudentModule WHERE StudentID = {}".format(session['studentid']))
     modules_reg = tuple(conn.execute("SELECT * FROM Module WHERE ModuleID = {}".format(x[1])) for x in moduleids)
     modules_available = conn.execute("SELECT * FROM Module")

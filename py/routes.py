@@ -1,5 +1,5 @@
 from app import application
-from flask import Flask, render_template, redirect, request, send_from_directory, url_for, session, flash
+from flask import Flask, render_template, redirect, request, send_from_directory, url_for, session, flash, jsonify
 from functools import wraps
 
 #Password Hashing
@@ -160,6 +160,50 @@ def home():
     moduleids = conn.execute("SELECT * FROM StudentModule WHERE StudentID = {}".format(session['studentid']))
     module_list = tuple(conn.execute("SELECT * FROM Module WHERE ModuleID = {}".format(x[1])) for x in moduleids)
     return render_template("studenthome.html", modules=module_list)
+#Modules page
+
+
+
+class ModuleForm(Form):
+    opt_in_course_code = TextField("")
+    opt_out_course_code = TextField("")
+
+@application.route("/modules/", methods=['GET', 'POST'])
+@login_required
+def modules():
+    conn, trans = connect()
+    moduleids = conn.execute("SELECT * FROM StudentModule WHERE StudentID = {}".format(session['studentid']))
+    modules_reg = tuple(conn.execute("SELECT * FROM Module WHERE ModuleID = {}".format(x[1])) for x in moduleids)
+    modules_available = conn.execute("SELECT * FROM Module")
+
+    try:
+        form = ModuleForm(request.form)
+        if request.method == "POST" and form.validate():
+            if 'opt_out_course_code' in request.form:
+                module_code = form.opt_out_course_code.data
+                for row in modules_available:
+                    if row[3] == module_code:
+                        module_id = row[0]
+                conn.execute("DELETE FROM StudentModule WHERE StudentID=%s AND ModuleID=%s", (session['studentid'], module_id))
+                trans.commit()
+            elif 'opt_in_course_code' in request.form:
+                module_code = form.opt_in_course_code.data
+                meme = "test"
+                for row in modules_available:
+                    if row[3] == module_code:
+                        module_id = row[0]
+                        meme = "changed"
+                conn.execute("INSERT INTO StudentModule VALUES (%s, %s)", (session['studentid'], module_id))
+                trans.commit()
+            else:
+                return "not work"
+    except:
+        return render_template("studentmodule.html", modules_reg=modules_reg, modules_available=modules_available)
+    moduleids = conn.execute("SELECT * FROM StudentModule WHERE StudentID = {}".format(session['studentid']))
+    modules_reg = tuple(conn.execute("SELECT * FROM Module WHERE ModuleID = {}".format(x[1])) for x in moduleids)
+    modules_available = conn.execute("SELECT * FROM Module")
+    return render_template("studentmodule.html", modules_reg=modules_reg, modules_available=modules_available)
+
 #Student Exams
 @application.route("/exams/", methods=['GET', 'POST'])
 @login_required

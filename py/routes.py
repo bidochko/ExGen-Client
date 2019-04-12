@@ -1,5 +1,5 @@
 from app import application
-from flask import Flask, render_template, redirect, request, send_from_directory, url_for, session, flash
+from flask import Flask, render_template, redirect, request, send_from_directory, url_for, session, flash, jsonify
 from functools import wraps
 
 #Password Hashing
@@ -38,7 +38,7 @@ def logout_required(f):
     @wraps(f) #wrapper
     def wrap(*args, **kwargs):
         if 'logged_in' in session:
-            return redirect(url_for('home')) #Return to home page
+            return redirect(url_for('home')) #Return to login page
         else:
             return f(*args, **kwargs)
     return wrap
@@ -63,6 +63,7 @@ def index():
         if request.method == "POST": #user presses "login"
             data = conn.execute("SELECT * from User where UserName = %s", thwart(request.form['username']))
             for row in data:
+                userid = row[0]
                 hash = row[2] # 3rd column is the hashed password
                 salt = row[3] # 4th column is the salt
 
@@ -70,6 +71,11 @@ def index():
             if sha256_crypt.verify(request.form['password'], formattedhash): #successful login
                 session['logged_in'] = True #set session as logged in
                 session['username'] = request.form['username'] #set username as username session
+                session['userid'] = userid
+                data = conn.execute("SELECT * from Student where UserID = %s", (userid))
+                for row in data:
+                    studentid = row[0]
+                session['studentid'] = studentid
                 return redirect(url_for("home")) #redirect user to /home
             else:
                 error = "Incorrect credentials"
@@ -87,6 +93,7 @@ def index():
 class RegistrationForm(Form):
     name = TextField("Full Name", [validators.Required(), validators.Length(min=1, max=128)])
     username = TextField("Email", [validators.Required(), validators.Length(min=1, max=128)])
+    studentid = TextField("Email", [validators.Required(), validators.Length(min=9, max=9)])
     password = PasswordField("Password", [validators.Required(), validators.Length(min=8, max=128), validators.EqualTo('confirm', message='Passwords must match')])
     confirm = PasswordField('Re-enter password')
     accept_tos = BooleanField('I accept giving away my soul', [validators.Required()])
@@ -100,6 +107,7 @@ def register():
         if request.method == "POST" and form.validate():
             name = form.name.data
             username = form.username.data
+            studentid = form.studentid.data
             randomSalt = createSalt()
             password = sha256_crypt.encrypt((str(form.password.data)), salt=randomSalt, rounds=555000)
             password = password.split("$")[4]
@@ -116,6 +124,10 @@ def register():
                 try:
                     type = "student"
                     conn.execute("INSERT INTO User (UserName, Hash, Salt, Type) VALUES (%s, %s, %s, %s)", (thwart(username), thwart(password), randomSalt, type))
+                    data = conn.execute("SELECT * from User where UserName = %s", (thwart(username)))
+                    for row in data:
+                        userid = row[0]
+                    conn.execute("INSERT INTO Student (StudentID, UserID) VALUES (%s, %s)", ((thwart(studentid)), userid))
                     trans.commit()  # transaction is not committed yet
                 except:
                     trans.rollback() # this rolls back the transaction unconditionally
@@ -144,7 +156,63 @@ def handle_404(e):
 @application.route("/home/", methods=['GET', 'POST'])
 @login_required
 def home():
-    return render_template("studenthome.html")
+    conn, trans = connect()
+    moduleids = conn.execute("SELECT * FROM StudentModule WHERE StudentID = {}".format(session['studentid']))
+    module_list = tuple(conn.execute("SELECT * FROM Module WHERE ModuleID = {}".format(x[1])) for x in moduleids)
+    return render_template("studenthome.html", modules=module_list)
+#Modules page
+
+
+
+#Form for the buttons
+class ModuleForm(Form):
+    #variable names used in html
+    opt_in_course_code = TextField("")
+    opt_out_course_code = TextField("")
+
+@application.route("/modules/", methods=['GET', 'POST'])
+@login_required
+def modules():
+    conn, trans = connect() #Connect to MySQL
+    modules_available = conn.execute("SELECT * FROM Module") #Get all modules
+
+    form = ModuleForm(request.form)                      #Form for the opt-in/out buttons
+    if request.method == "POST" and form.validate():     #if button is pressed
+        if 'opt_out_course_code' in request.form:        #Opt-out button was pressed
+            module_code = form.opt_out_course_code.data  #Get module button id
+            for row in modules_available:                #Getting module_id from COMPXXX
+                if row[3] == module_code:
+                    module_id = row[0]
+            conn.execute("DELETE FROM StudentModule WHERE StudentID=%s AND ModuleID=%s", (session['studentid'], module_id)) #Delete query from StudentModule table
+            trans.commit() #Commit transaction
+        elif 'opt_in_course_code' in request.form:
+            module_code = form.opt_in_course_code.data #same as above but for opt-in
+            meme = "test"
+            for row in modules_available:
+                if row[3] == module_code:
+                    module_id = row[0]
+
+            #here we need to check if the student is already optted into the chosen module
+            #What would be better here would be if we only display true available modules
+            student_modules = conn.execute("SELECT * FROM StudentModule WHERE StudentID = {}".format(session['studentid'])) #get students registered modules
+            already_added = False #boolean for check
+            for module in student_modules: #loop through all and check if module_id is in this list
+                if module[1] == module_id:
+                    already_added = True
+            if already_added == False:
+                #If module is not in the list, add it to the list
+                conn.execute("INSERT INTO StudentModule VALUES (%s, %s)", (session['studentid'], module_id))
+                trans.commit()
+            else:
+                #Flash an error message otherwise
+                flash("Module already added")
+
+    #Get registered modules and available modules
+    moduleids = conn.execute("SELECT * FROM StudentModule WHERE StudentID = {}".format(session['studentid']))
+    modules_reg = tuple(conn.execute("SELECT * FROM Module WHERE ModuleID = {}".format(x[1])) for x in moduleids)
+    modules_available = conn.execute("SELECT * FROM Module")
+    return render_template("studentmodule.html", modules_reg=modules_reg, modules_available=modules_available)
+
 #Student Exams
 @application.route("/exams/", methods=['GET', 'POST'])
 @login_required

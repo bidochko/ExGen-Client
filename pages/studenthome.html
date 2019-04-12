@@ -2,7 +2,7 @@
   <head>
     <title>Home</title>
     <link rel="shortcut icon" href="{{url_for("static", filename="favicon.png")}}" type="image/x-icon">
-    <link rel="stylesheet" type="text/css" href="{{url_for("static", filename="css/stylesheet.css")}}">
+    <link rel="stylesheet" type="text/css" href="{{url_for("static", filename="css/home.css")}}">
     <meta charset="utf-8">
   </head>
   <body>
@@ -31,12 +31,35 @@
       {% endif %}
     {% endwith %}
 
-    <div class="home" align="center">
+    <div class="main" align="center">
       <div class="quote">
         <p2><i>Exgen is a tool for procedurally generating Computer Science <br>& Mathematics exam papers.</i></p2>
       </div>
       <div class="registered">
         <p2><b>Registered Modules</b></p2>
+        <div class="table-responsive">
+          <table class="table" id="modules">
+            <thead>
+              <col width="110px" />
+              <col width="340px" />
+              <tr>
+                <th scope="col"><p2><b>Course code</b></p2></th>
+                <th scope="col"><p2><b>Course name</b></p2></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for module in modules %}
+                {% for row in module %}
+                  <tr id={{ row[0] }}>
+                    <th scope="row"><p2>{{ row[3] }}</p2></th>
+                    <td><p2>{{ row[1] }}</p2></td>
+                  </tr>
+                {% endfor %}
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <a href="/modules/"><button class="addmodules">Add module</button></a>
       </div>
     </div>
 

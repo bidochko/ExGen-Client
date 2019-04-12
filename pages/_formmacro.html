@@ -9,6 +9,9 @@
           {% if field.name == "username" %}
             <div class="emailpos"><i>Email field is required</i></div>
           {% endif %}
+          {% if field.name == "studentid" %}
+            <div class="idpos"><i>Student ID should be 9 numbers</i></div>
+          {% endif %}
           {% if field.name == "password" %}
             {% if error == "Field must be between 8 and 128 characters long." %}
               <div class="passwordpos"><i>Password must be at least 8 characters</i></div>

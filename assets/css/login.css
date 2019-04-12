@@ -24,7 +24,7 @@ input[type=text] {
   border: 2px solid #00A8A5;
   border-radius: 5px;
   width: 400px;
-  height: 25px;
+  height: 30px;
   margin: 0px 0;
   font-family: 'Ubuntu';
   font-style: normal;
@@ -39,7 +39,7 @@ input[type=password] {
   border: 2px solid #00A8A5;
   border-radius: 5px;
   width: 400px;
-  height: 25px;
+  height: 30px;
   margin: 0px 0;
   font-family: 'Ubuntu';
   font-style: normal;
@@ -93,6 +93,7 @@ img {
 .invalid {
   position: relative;
   top: 70px;
+  left: 68px;
 }
 .login {
   position:absolute;

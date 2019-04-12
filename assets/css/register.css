@@ -53,11 +53,15 @@ p3 {
 }
 .namepos {
   position: relative;
-  top: -23px;
+  top: -26px;
 }
 .emailpos {
   position: relative;
-  top: -24px;
+  top: -26px;
+}
+.idpos {
+  position: relative;
+  top: -27px;
 }
 .passwordpos {
   position: relative;
@@ -77,9 +81,8 @@ input[type=text] {
   border: 2px solid #00A8A5;
   border-radius: 5px;
   width: 400px;
-  height: 25px;
+  height: 30px;
   left: -40px;
-  margin: 0px 0;
   font-family: 'Ubuntu';
   font-style: normal;
   font-weight: normal;
@@ -94,7 +97,7 @@ input[type=password] {
   border-radius: 5px;
   top: 15px;
   width: 400px;
-  height: 25px;
+  height: 30px;
   left: -40px;
   margin: 0px 0;
   font-family: 'Ubuntu';
@@ -154,7 +157,7 @@ img {
 }
 dd {
   width: 600px;
-  height: 25px;
+  height: 32px;
   left: 100px;
 }
 br {

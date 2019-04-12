@@ -2,7 +2,7 @@
   <head>
     <title>Settings</title>
     <link rel="shortcut icon" href="{{url_for("static", filename="favicon.png")}}" type="image/x-icon">
-    <link rel="stylesheet" type="text/css" href="{{url_for("static", filename="css/stylesheet.css")}}">
+    <link rel="stylesheet" type="text/css" href="{{url_for("static", filename="css/settings.css")}}">
     <meta charset="utf-8">
   </head>
   <body>
@@ -30,5 +30,15 @@
         {% endfor %}
       {% endif %}
     {% endwith %}
+
+    <div class="main" align="center">
+      <div class="spacer"></div>
+      <div class="reset-password">
+        <p2><b>Reset password</b></p2>
+        <div class="message">
+          <p2>We’ll send a link to reset your password to your email. Implement the button when emailing works</p2>
+        </div>
+      </div>
+    </div>
   </body>
 </html>

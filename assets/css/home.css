@@ -135,9 +135,9 @@ img {
   line-height: normal;
   text-align: left;
 }
-.home {
+.main {
   position: relative;
-  margin-top: 0px;
+  top: 15px;
   margin-left: auto;
   margin-right: auto;
   width: 1000px;
@@ -150,5 +150,86 @@ img {
 .registered {
   position: relative;
   text-align: left;
-  height: 300px;
+  height: auto;
+}
+.registered2 {
+  position: relative;
+  top: 50px;
+  text-align: left;
+  height: auto;
+}
+.available {
+  position: relative;
+  top: 100px;
+  text-align: left;
+  height: auto;
+}
+.table-responsive {
+  position: relative;
+  left:50%;
+  top: 20px;
+  margin-left: -200px;
+}
+th {
+  height:24px;
+}
+td {
+  text-align: center;
+}
+th {
+   text-align: center;
+}
+.addmodules {
+  position: relative;
+  top: 35px;
+  float: left;
+  left: 15px;
+}
+.table-responsive {
+  position: relative;
+  float: center;
+  width: 1000px;
+  left: 45%;
+}
+button {
+  position: absolute;
+  position: relative;
+  background-color: #00A8A5;
+  border: none;
+  border-radius: 5px 5px 5px 5px;
+  color: black;
+  padding: 3px 16px;
+  font-family: 'Ubuntu';
+  font-style: normal;
+  font-weight: normal;
+  font-size: 20px;
+  line-height: normal;
+  text-align: center;
+  vertical-align: middle;
+}
+.opt-button {
+  position: relative;
+  left: 10px;
+  font-family: 'Ubuntu';
+  width: 70px;
+  padding: 3px 0px;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 16px;
+  line-height: normal;
+  text-align: center;
+}
+form[class=opt] {
+  height:0px;
+}
+input[type=text] {
+  background-color: transparent;
+  border: none;
+  width: 100px;
+  font-family: 'Ubuntu';
+  font-style: normal;
+  font-weight: normal;
+  font-size: 18px;
+  line-height: normal;
+  text-align: center;
 }

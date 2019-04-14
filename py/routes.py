@@ -223,8 +223,29 @@ def exams():
 @login_required
 def results():
     return render_template("studentresults.html")
+
+
+
 #Student Settings
+#I cant figure out a better way of getting which button was pressed, please help
+class SettingsForm(Form):
+    btn_reset = TextField("")
+    btn_delete = TextField("")
+    btn_verification = TextField("")
+
 @application.route("/settings/", methods=['GET', 'POST'])
 @login_required
 def settings():
-    return render_template("studentsettings.html")
+    form = SettingsForm(request.form)
+    if request.method == "POST" and form.validate():
+        if 'btn_reset' in request.form:
+            #This is where the code for the email sending for resetting a password would go
+            redirect(url_for("settings"))
+        elif 'btn_delete' in request.form:
+            #Delete account
+            redirect(url_for("settings"))
+        elif 'btn_verification' in request.form:
+            #Request verification
+            redirect(url_for("settings"))
+    else:
+        return render_template("studentsettings.html")

@@ -224,3 +224,17 @@ button {
   line-height: normal;
   text-align: center;
 }
+input[type=text] {
+  position: relative;
+  background-color: transparent;
+  height: 0px;
+  width: 0px;
+  left:-9999px;
+  border: none;
+  font-family: 'Ubuntu';
+  font-style: normal;
+  font-weight: normal;
+  font-size: 18px;
+  line-height: normal;
+  text-align: left;
+}

@@ -32,10 +32,10 @@ p2 {
   margin-right: auto;
   border: none;
   top: 15px;
-  width: 435px;
+  width:709px;
   height: 30px;
   display: flex;
-  justify-content: space-around;
+  justify-content: stretch;
 }
 .menucurrent {
   background-color: #00A8A5;

@@ -159,7 +159,7 @@ def home():
     conn, trans = connect()
     moduleids = conn.execute("SELECT * FROM StudentModule WHERE StudentID = {}".format(session['studentid']))
     module_list = tuple(conn.execute("SELECT * FROM Module WHERE ModuleID = {}".format(x[1])) for x in moduleids)
-    return render_template("studenthome.html", modules=module_list)
+    return render_template("courserep/courserep-home.html", modules=module_list)
 #Modules page
 
 
@@ -211,18 +211,18 @@ def modules():
     moduleids = conn.execute("SELECT * FROM StudentModule WHERE StudentID = {}".format(session['studentid']))
     modules_reg = tuple(conn.execute("SELECT * FROM Module WHERE ModuleID = {}".format(x[1])) for x in moduleids)
     modules_available = conn.execute("SELECT * FROM Module")
-    return render_template("studentmodule.html", modules_reg=modules_reg, modules_available=modules_available)
+    return render_template("courserep/courserep-module.html", modules_reg=modules_reg, modules_available=modules_available)
 
 #Student Exams
 @application.route("/exams/", methods=['GET', 'POST'])
 @login_required
 def exams():
-    return render_template("studentexams.html")
+    return render_template("courserep/courserep-exams.html")
 #Student Results
 @application.route("/results/", methods=['GET', 'POST'])
 @login_required
 def results():
-    return render_template("studentresults.html")
+    return render_template("courserep/courserep-results.html")
 
 
 
@@ -240,12 +240,18 @@ def settings():
     if request.method == "POST" and form.validate():
         if 'btn_reset' in request.form:
             #This is where the code for the email sending for resetting a password would go
-            redirect(url_for("settings"))
+            return redirect(url_for("settings"))
         elif 'btn_delete' in request.form:
             #Delete account
-            redirect(url_for("settings"))
+            return redirect(url_for("settings"))
         elif 'btn_verification' in request.form:
             #Request verification
-            redirect(url_for("settings"))
+            return redirect(url_for("settings"))
     else:
-        return render_template("studentsettings.html")
+        return render_template("courserep/courserep-settings.html")
+
+#Course results
+@application.route("/course-results/", methods=['GET', 'POST'])
+@login_required
+def course_results():
+    return render_template("courserep/courserep-course.html")

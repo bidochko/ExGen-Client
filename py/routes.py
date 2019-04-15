@@ -51,7 +51,6 @@ def logout():
     gc.collect() #garbage collector
     return redirect(url_for('index')) #return user to index
 
-
 #Index / Login
 @application.route('/', methods=['GET', 'POST'])
 @application.route('/index', methods=['GET', 'POST'])
@@ -64,18 +63,21 @@ def index():
             data = conn.execute("SELECT * from User where UserName = %s", thwart(request.form['username']))
             for row in data:
                 userid = row[0]
+                email = row[1]
                 hash = row[2] # 3rd column is the hashed password
                 salt = row[3] # 4th column is the salt
-
+                usertype = row[4]
             formattedhash = "$5$rounds=555000$" + salt + "$" + hash #formatted password for .verify function
             if sha256_crypt.verify(request.form['password'], formattedhash): #successful login
-                session['logged_in'] = True #set session as logged in
-                session['username'] = request.form['username'] #set username as username session
-                session['userid'] = userid
                 data = conn.execute("SELECT * from Student where UserID = %s", (userid))
                 for row in data:
                     studentid = row[0]
-                session['studentid'] = studentid
+                #Session details
+                session['logged_in'] = True #set session as logged in
+                session['username'] = email #set username as email
+                session['userid'] = userid #userid
+                session['usertype'] = usertype #user type i.e. student
+                session['studentid'] = studentid #studentid
                 return redirect(url_for("home")) #redirect user to /home
             else:
                 error = "Incorrect credentials"
@@ -122,7 +124,7 @@ def register():
                 return render_template('register.html', form=form)
             else:
                 try:
-                    type = "student"
+                    type = "courserep"
                     conn.execute("INSERT INTO User (UserName, Hash, Salt, Type) VALUES (%s, %s, %s, %s)", (thwart(username), thwart(password), randomSalt, type))
                     data = conn.execute("SELECT * from User where UserName = %s", (thwart(username)))
                     for row in data:
@@ -152,14 +154,23 @@ def handle_404(e):
     return redirect(url_for('index'))
 
 
-#Student Home
+#Home
 @application.route("/home/", methods=['GET', 'POST'])
 @login_required
 def home():
-    conn, trans = connect()
-    moduleids = conn.execute("SELECT * FROM StudentModule WHERE StudentID = {}".format(session['studentid']))
-    module_list = tuple(conn.execute("SELECT * FROM Module WHERE ModuleID = {}".format(x[1])) for x in moduleids)
-    return render_template("courserep/courserep-home.html", modules=module_list)
+    if(session['usertype'] == "student"): #Student Home
+        conn, trans = connect()
+        moduleids = conn.execute("SELECT * FROM StudentModule WHERE StudentID = {}".format(session['studentid']))
+        module_list = tuple(conn.execute("SELECT * FROM Module WHERE ModuleID = {}".format(x[1])) for x in moduleids)
+        return render_template("student/student-home.html", modules=module_list)
+    elif(session['usertype'] == "courserep"): #Course Rep home
+        conn, trans = connect()
+        moduleids = conn.execute("SELECT * FROM StudentModule WHERE StudentID = {}".format(session['studentid']))
+        module_list = tuple(conn.execute("SELECT * FROM Module WHERE ModuleID = {}".format(x[1])) for x in moduleids)
+        return render_template("courserep/courserep-home.html", modules=module_list)
+    else: #temp redirect for other user
+        return redirect(url_for('logout'))
+
 #Modules page
 
 
@@ -208,22 +219,41 @@ def modules():
                 flash("Module already added")
 
     #Get registered modules and available modules
-    moduleids = conn.execute("SELECT * FROM StudentModule WHERE StudentID = {}".format(session['studentid']))
-    modules_reg = tuple(conn.execute("SELECT * FROM Module WHERE ModuleID = {}".format(x[1])) for x in moduleids)
-    modules_available = conn.execute("SELECT * FROM Module")
-    return render_template("courserep/courserep-module.html", modules_reg=modules_reg, modules_available=modules_available)
+    if(session['usertype'] == "student"):
+        moduleids = conn.execute("SELECT * FROM StudentModule WHERE StudentID = {}".format(session['studentid']))
+        modules_reg = tuple(conn.execute("SELECT * FROM Module WHERE ModuleID = {}".format(x[1])) for x in moduleids)
+        modules_available = conn.execute("SELECT * FROM Module")
+        return render_template("student/student-module.html", modules_reg=modules_reg, modules_available=modules_available)
+    elif(session['usertype'] == "courserep"): #Course Rep home
+        moduleids = conn.execute("SELECT * FROM StudentModule WHERE StudentID = {}".format(session['studentid']))
+        modules_reg = tuple(conn.execute("SELECT * FROM Module WHERE ModuleID = {}".format(x[1])) for x in moduleids)
+        modules_available = conn.execute("SELECT * FROM Module")
+        return render_template("student/student-module.html", modules_reg=modules_reg, modules_available=modules_available)
+    else:
+        return redirect(url_for('logout'))
+
 
 #Student Exams
 @application.route("/exams/", methods=['GET', 'POST'])
 @login_required
 def exams():
-    return render_template("courserep/courserep-exams.html")
+    if(session['usertype'] == "student"): #Student Exams
+        return render_template("student/student-exams.html")
+    elif(session['usertype'] == "courserep"): #Course Exams
+        return render_template("courserep/courserep-exams.html")
+    else: #temp redirect for other user
+        return redirect(url_for('logout'))
+
 #Student Results
 @application.route("/results/", methods=['GET', 'POST'])
 @login_required
 def results():
-    return render_template("courserep/courserep-results.html")
-
+    if(session['usertype'] == "student"): #student results
+        return render_template("student/student-results.html")
+    elif(session['usertype'] == "courserep"): #Course Rep results
+        return render_template("courserep/courserep-results.html")
+    else:
+        return redirect(url_for('logout'))
 
 
 #Student Settings
@@ -247,9 +277,12 @@ def settings():
         elif 'btn_verification' in request.form:
             #Request verification
             return redirect(url_for("settings"))
-    else:
+    if(session['usertype'] == "student"):
+        return render_template("student/student-settings.html")
+    elif(session['usertype'] == "courserep"): #Course Rep home
         return render_template("courserep/courserep-settings.html")
-
+    else:
+        return redirect(url_for('logout'))
 #Course results
 @application.route("/course-results/", methods=['GET', 'POST'])
 @login_required

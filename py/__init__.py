@@ -4,3 +4,4 @@ application = Flask(__name__, static_url_path="")
 
 from app import routes
 from flask_sqlalchemy import SQLAlchemy
+import models

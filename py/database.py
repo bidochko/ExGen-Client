@@ -22,3 +22,8 @@ def create_student(username, pw_hash, pw_salt):
     student.isCourseRep = False
     db_session.add(student)
     db_session.commit()
+
+
+def get_user_from_user_id(user_id):
+    user = db_session.query(User).filter(User.UserID == user_id).first()
+    return user

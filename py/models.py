@@ -4,9 +4,11 @@ from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Table, Big
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker, relationship
 from sqlalchemy.ext.declarative import declarative_base
+from config import db_user, db_password, db_host, db_name, db_port
 
 Base = declarative_base()
-engine = create_engine('mysql://exgensql:yKH2T&%u~L5<@localhost/EXGenDB')
+metadata = Base.metadata
+engine = create_engine('mysql+pymysql://{}:{}@{}:{}/{}?charset=utf8'.format(db_user, db_password, db_host, db_port, db_name))
 
 
 class User(Base):
@@ -51,7 +53,7 @@ class CourseModule(Base):
 class Exam(Base):
     __tablename__ = "Exam"
     ExamID = Column(Integer, autoincrement=True, primary_key=True, unique=True, nullable=False)
-    Title = Column(String(32), nullable=false)
+    Title = Column(String(32), nullable=False)
     Description = Column(String(128))
     Enabled = Column(Boolean, nullable=False)
 
@@ -111,3 +113,5 @@ t_Variable_Question = Table(
            index=True),
     Column('QuestionID', ForeignKey('Answered.QuestionID'), primary_key=True, nullable=False, index=True)
 )
+
+metadata.create_all(bind=engine)

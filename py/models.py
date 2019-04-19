@@ -17,8 +17,8 @@ class User(Base):
     UserName = Column(String(128), nullable=False, unique=True)
     Hash = Column(String(128), nullable=False)
     Salt = Column(String(128), nullable=False)
-    Professor = relationship("Professor")
-    Student = relationship("Student")
+    Professor = relationship("Professor", uselist=False)
+    Student = relationship("Student", uselist=False)
     Answered = relationship("Answered")
 
 
@@ -43,7 +43,7 @@ class Student(Base):
 class CourseModule(Base):
     __tablename__ = "CourseModule"
     ModuleID = Column(Integer, autoincrement=True, primary_key=True, unique=True, nullable=False)
-    ModuleName = Column(String(128), nullable=False)
+    ModuleName = Column(String(128), nullable=False, unique=True)
     ModuleDescription = Column(String(128))
     ModuleCode = Column(Integer, unique=True, nullable=False)
     Exam = relationship('Exam')

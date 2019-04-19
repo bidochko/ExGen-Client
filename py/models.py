@@ -17,7 +17,6 @@ class User(Base):
     UserName = Column(String(128), nullable=False, unique=True)
     Hash = Column(String(128), nullable=False)
     Salt = Column(String(128), nullable=False)
-    Type = Column(Integer, nullable=False)
     Professor = relationship("Professor")
     Student = relationship("Student")
     Answered = relationship("Answered")
@@ -36,7 +35,7 @@ class Professor(Base):
 class Student(Base):
     __tablename__ = "Student"
     StudentID = Column(Integer, autoincrement=True, primary_key=True, unique=True, nullable=False)
-
+    isCourseRep = Column(Boolean, nullable=False)
     UserID = Column(ForeignKey('User.UserID'), primary_key=False, nullable=False, index=True)
     User = relationship('User')
 

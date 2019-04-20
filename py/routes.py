@@ -13,6 +13,7 @@ from wtforms.validators import ValidationError, DataRequired, Email, EqualTo, Le
 
 #SQL Injection prevention
 from MySQLdb import escape_string as thwart
+from db import database
 from dbconnect import connect
 
 #Emailing
@@ -59,46 +60,37 @@ def logout():
 @application.route('/index', methods=['GET', 'POST'])
 @logout_required
 def index():
-    error = '' #temp definition
-    try:
-        conn, trans = connect() #Connect SQLAlchemy Engine to MySQL
-        if request.method == "POST": #user presses "login"
-            data = conn.execute("SELECT * FROM User WHERE UserName = %s", thwart(request.form['username']))
-            for row in data:
-                userid = row[0]
-                email = row[1]
-                hash = row[2] # 3rd column is the hashed password
-                salt = row[3] # 4th column is the salt
-                usertype = row[4]
+    error = "" #temp definition
+    if request.method == "POST": #user presses "login"
+        user = database.get_user_from_user_name(thwart(request.form['username']))
+        if(user == None):
+            error = "Incorrect credentials"
+            return render_template("login.html", error = error) #refresh with error
+        else:
+            userid = user.UserID
+            email = user.UserName
+            hash = user.Hash
+            salt = user.Salt
+            #NEED TO FINISH USERTYPE
+            usertype = "student"
+            ########################
             formattedhash = "$5$rounds=555000$" + salt + "$" + hash #formatted password for .verify function
-            if sha256_crypt.verify(request.form['password'], formattedhash): #successful login
-                #Session details
+            if sha256_crypt.verify(request.form['password'], formattedhash):
                 session['logged_in'] = True #set session as logged in
                 session['username'] = email #set username as email
                 session['userid'] = userid #userid
                 session['usertype'] = usertype #user type i.e. student
                 if(usertype == "professor"):
-                    data = conn.execute("SELECT * from Professor where UserID = %s", (userid))
-                    for row in data:
-                        professorid = row[0]
-                    session['professorid'] = professorid #professorid instead of studentid
+                    professor = database.get_professor_from_user_id(userid)
+                    session['professorid'] = professor.ProfessorID
                 else:
-                    data = conn.execute("SELECT * from Student where UserID = %s", (userid))
-                    for row in data:
-                        studentid = row[0]
-                    session['studentid'] = studentid #studentid
-                return redirect(url_for("home")) #redirect user to /home
+                    student = database.get_student_from_user_id(userid)
+                    session['studentid'] = student.StudentID
+                return redirect(url_for('home'))
             else:
                 error = "Incorrect credentials"
-        gc.collect()
-        conn.close() #close database connection
-        return render_template("login.html", error=error) #refresh with error
-    except Exception as e:
-        error = "Incorrect credentials"
-        return render_template("login.html", error = error) #refresh with error
-
-
-
+        return render_template("login.html", error=error)
+    return render_template("login.html", error = error) #refresh with error
 
 #Register Form
 class RegistrationForm(Form):
@@ -112,43 +104,23 @@ class RegistrationForm(Form):
 @application.route('/register/', methods=["GET","POST"])
 @logout_required
 def register():
-    try:
-        form = RegistrationForm(request.form)
+    form = RegistrationForm(request.form)
+    if request.method == "POST" and form.validate():
+        name = form.name.data
+        username = form.username.data
+        studentid = form.studentid.data
+        randomSalt = createSalt()
+        password = sha256_crypt.encrypt((str(form.password.data)), salt=randomSalt, rounds=555000)
+        password = password.split("$")[4]
 
-        if request.method == "POST" and form.validate():
-            name = form.name.data
-            username = form.username.data
-            studentid = form.studentid.data
-            randomSalt = createSalt()
-            password = sha256_crypt.encrypt((str(form.password.data)), salt=randomSalt, rounds=555000)
-            password = password.split("$")[4]
-
-            conn, trans = connect()
-            counter = 0
-            x = conn.execute("SELECT * from User where UserName = %s", thwart(username))
-            for row in x:
-                counter += 1
-            if counter > 0:
-                flash("Email is already registered")
-                return render_template('register.html', form=form)
-            else:
-                try:
-                    type = "student"
-                    conn.execute("INSERT INTO User (UserName, Hash, Salt, Type) VALUES (%s, %s, %s, %s)", (thwart(username), thwart(password), randomSalt, type))
-                    data = conn.execute("SELECT * from User where UserName = %s", (thwart(username)))
-                    for row in data:
-                        userid = row[0]
-                    conn.execute("INSERT INTO Student (StudentID, UserID) VALUES (%s, %s)", ((thwart(studentid)), userid))
-                    trans.commit()  # transaction is not committed yet
-                except:
-                    trans.rollback() # this rolls back the transaction unconditionally
-            conn.close()
-            gc.collect()
-            return redirect(url_for('index'))
-        return render_template("register.html", form=form)
-
-    except Exception as e:
-        return(str(e))
+        user = database.get_user_from_user_name(thwart(username))
+        if(user != None):
+            flash("Email is already registered")
+            return render_template('register.html', form=form)
+        else:
+            database.create_student(thwart(username), thwart(password), randomSalt)
+        return redirect(url_for('index'))
+    return render_template("register.html", form=form)
 
 
 
@@ -172,6 +144,7 @@ def home():
         conn, trans = connect()
         moduleids = conn.execute("SELECT * FROM StudentModule WHERE StudentID = {}".format(session['studentid']))
         module_list = tuple(conn.execute("SELECT * FROM Module WHERE ModuleID = {}".format(x[1])) for x in moduleids)
+        module_list = database.get_full_module_list_from_student_id(student_id)
         return render_template("student/student-home.html", modules=module_list)
     elif(session['usertype'] == "courserep"): #Course Rep home
         conn, trans = connect()

@@ -30,14 +30,18 @@ class Professor(Base):
 
     UserID = Column(ForeignKey('User.UserID'), primary_key=False, nullable=False, index=True)
     User = relationship('User')
+    ProfessorModule = relationship('ProfessorModule')
+
 
 
 class Student(Base):
     __tablename__ = "Student"
     StudentID = Column(Integer, autoincrement=True, primary_key=True, unique=True, nullable=False)
     isCourseRep = Column(Boolean, nullable=False)
+
     UserID = Column(ForeignKey('User.UserID'), primary_key=False, nullable=False, index=True)
     User = relationship('User')
+    StudentModule = relationship('StudentModule')
 
 
 class CourseModule(Base):
@@ -47,6 +51,8 @@ class CourseModule(Base):
     ModuleDescription = Column(String(128))
     ModuleCode = Column(Integer, unique=True, nullable=False)
     Exam = relationship('Exam')
+    StudentModule = relationship('StudentModule')
+    ProfessorModule = relationship('ProfessorModule')
 
 
 class Exam(Base):
@@ -84,19 +90,29 @@ class Answered(Base):
     User = relationship("User")
 
 
-t_Student_Module = Table(
-    'Student_Module', metadata,
-    Column('StudentID', ForeignKey('Student.StudentID'), primary_key=True, nullable=False, index=True),
-    Column('ModuleID', ForeignKey('CourseModule.ModuleID'), primary_key=True, nullable=False, index=True),
-    Column('CourseRep', Boolean, nullable=False)
-)
+class StudentModule(Base):
+    __tablename__ = "StudentModule"
+    StudentID = Column(Integer, primary_key=True,  nullable=False)
+    ModuleID = Column(Integer, primary_key=True, nullable=False)
+    CourseRep = Column(Boolean, nullable=False)
 
-t_Professor_Module = Table(
-    'Professor_Module', metadata,
-    Column('ProfessorID', ForeignKey('Professor.ProfessorID'), primary_key=True, nullable=False, index=True),
-    Column('ModuleID', ForeignKey('CourseModule.ModuleID'), primary_key=True, nullable=False, index=True),
-    Column('HeadProfessor', Boolean, nullable=False)
-)
+    StudentID = Column(ForeignKey('Student.StudentID'), primary_key=True, nullable=False, index=True)
+    Student = relationship("Student")
+    ModuleID = Column(ForeignKey('CourseModule.ModuleID'), primary_key=True, nullable=False, index=True)
+    CourseModule = relationship("CourseModule")
+
+
+class ProfessorModule(Base):
+    __tablename__ = "ProfessorModule"
+    ProfessorID = Column(Integer, primary_key=True, nullable=False)
+    ModuleID = Column(Integer, primary_key=True, nullable=False)
+    HeadProfessor = Column(Boolean, nullable=False)
+
+    ProfessorID = Column(ForeignKey('Professor.ProfessorID'), primary_key=True, nullable=False, index=True)
+    Professor = relationship("Professor")
+    ModuleID = Column(ForeignKey('CourseModule.ModuleID'), primary_key=True, nullable=False, index=True)
+    CourseModule = relationship("CourseModule")
+
 
 t_Exam_Question = Table(
     'Exam_Question', metadata,

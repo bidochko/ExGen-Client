@@ -315,8 +315,24 @@ def create_module():
 @application.route("/exams/", methods=['GET', 'POST'])
 @login_required
 def exams():
+    conn, trans = connect()
     if(session['usertype'] == "student"): #Student Exams
-        return render_template("student/student-exams.html")
+        moduleids = conn.execute("SELECT * FROM StudentModule WHERE StudentID = {}".format(session['studentid']))
+        module_list = tuple(conn.execute("SELECT * FROM Module WHERE ModuleID = {}".format(x[1])) for x in moduleids)
+
+        course_code = "NULL"
+        if request.method == "POST":
+            if 'module_buttons' in request.form: #Deleting a module
+                course_code = request.form.get("module_buttons")
+
+        if(course_code == "NULL"):
+            first_module = conn.execute("SELECT * FROM StudentModule WHERE StudentID=%s LIMIT 1", (session['studentid']))
+            for row in first_module:
+                first_moduleid = row[0]
+            module = conn.execute("SELECT * FROM Module WHERE ModuleID=%s", (first_moduleid))
+            for row in module:
+                course_code = row[3]
+        return render_template("student/student-exams.html", modules=module_list, course_code=course_code)
     elif(session['usertype'] == "courserep"): #Course Exams
         return render_template("courserep/courserep-exams.html")
     elif(session['usertype'] == "professor"): #Professor Exams
@@ -350,6 +366,7 @@ class SettingsForm(Form):
 @application.route("/settings/", methods=['GET', 'POST'])
 @login_required
 def settings():
+    conn, trans = connect()
     form = SettingsForm(request.form)
     if request.method == "POST" and form.validate():
         if 'btn_reset' in request.form:
@@ -357,7 +374,23 @@ def settings():
             return redirect(url_for("settings"))
         elif 'btn_delete' in request.form:
             #Delete account
-            return redirect(url_for("settings"))
+            try:
+                if(session['usertype'] == "professor"): #Professor
+                    conn.execute("DELETE FROM Professor WHERE UserID=%s", (session['userid']))
+                    conn.execute("DELETE FROM User WHERE UserID=%s", (session['userid']))
+                    trans.commit()
+                    return redirect(url_for('logout'))
+                else: #Every other user
+                    conn.execute("DELETE FROM Answered WHERE UserID=%s", (session['userid']))
+                    conn.execute("DELETE FROM Cookies WHERE UserID=%s", (session['userid']))
+                    conn.execute("DELETE FROM Student WHERE UserID=%s", (session['userid']))
+                    conn.execute("DELETE FROM StudentModule WHERE StudentID=%s", (session['studentid']))
+                    conn.execute("DELETE FROM User WHERE UserID=%s", (session['userid']))
+                    trans.commit()
+                    return redirect(url_for('logout'))
+            except:
+                flash("Oops, something went wrong")
+                return redirect(url_for("settings"))
         elif 'btn_verification' in request.form:
             #Request verification
             return redirect(url_for("settings"))

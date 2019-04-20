@@ -63,7 +63,7 @@ def index():
     try:
         conn, trans = connect() #Connect SQLAlchemy Engine to MySQL
         if request.method == "POST": #user presses "login"
-            data = conn.execute("SELECT * from User where UserName = %s", thwart(request.form['username']))
+            data = conn.execute("SELECT * FROM User WHERE UserName = %s", thwart(request.form['username']))
             for row in data:
                 userid = row[0]
                 email = row[1]
@@ -320,18 +320,21 @@ def exams():
         moduleids = conn.execute("SELECT * FROM StudentModule WHERE StudentID = {}".format(session['studentid']))
         module_list = tuple(conn.execute("SELECT * FROM Module WHERE ModuleID = {}".format(x[1])) for x in moduleids)
 
-        course_code = "NULL"
-        if request.method == "POST":
-            if 'module_buttons' in request.form: #Deleting a module
-                course_code = request.form.get("module_buttons")
+        course_code = "NULL" #temp code
+        if request.method == "POST": #on post
+            if 'module_buttons' in request.form: #check if button was pressed
+                course_code = request.form.get("module_buttons") #get module_code from button
 
-        if(course_code == "NULL"):
-            first_module = conn.execute("SELECT * FROM StudentModule WHERE StudentID=%s LIMIT 1", (session['studentid']))
-            for row in first_module:
-                first_moduleid = row[0]
-            module = conn.execute("SELECT * FROM Module WHERE ModuleID=%s", (first_moduleid))
-            for row in module:
-                course_code = row[3]
+        if(course_code == "NULL"): #if button wasn't pressed, set course_code to first registered module
+            try: #If user has no modules registered it erros, so set course_code to NULL if errors
+                first_module = conn.execute("SELECT * FROM StudentModule WHERE StudentID=%s LIMIT 1", (session['studentid'])) #get first registered module
+                for row in first_module:
+                    first_moduleid = row[1] #get module id
+                module = conn.execute("SELECT ModuleCode FROM Module WHERE ModuleID=%s", (first_moduleid)) #get module information
+                for row in module:
+                    course_code = row[0] #get module code i.e. COMP202
+            except:
+                course_code = "NULL" #no registered modules, handled in the html
         return render_template("student/student-exams.html", modules=module_list, course_code=course_code)
     elif(session['usertype'] == "courserep"): #Course Exams
         return render_template("courserep/courserep-exams.html")

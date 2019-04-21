@@ -37,6 +37,16 @@ def create_professor(username, pw_hash, pw_salt, professor_name, professor_info)
     db_session.commit()
 
 
+def add_student_to_module(student_id, module_id, course_representative):
+    student_module = StudentModule()
+    student_module.StudentID = student_id
+    student_module.ModuleID = module_id
+    student_module.CourseRep = course_representative
+
+    db_session.add(student_module)
+    db_session.commit()
+
+
 def add_professor_to_module(professor_id, module_id, head_professor):
     professor_module = ProfessorModule()
     professor_module.ProfessorID = professor_id
@@ -58,6 +68,18 @@ def create_module_given_head_professor(professor_id, module_name, module_descrip
 
     module_id = get_module_id_from_module_code(module_code)
     add_professor_to_module(professor_id, module_id, True)
+
+
+def create_exam(module_id, title, description, enabled):
+    exam = Exam()
+    exam.ModuleID = module_id
+    exam.Title = title
+    exam.Description = description
+    exam.Enabled = enabled
+
+    db_session.add(exam)
+    db_session.commit()
+
 
 # Get Functions
 
@@ -121,16 +143,6 @@ def get_full_module_list_from_student_id(student_id):
         module_list.extend(module)
     return module_list
 
-
-def add_student_to_module(student_id, module_id, course_representative):
-    student_module = StudentModule()
-    student_module.StudentID = student_id
-    student_module.ModuleID = module_id
-    student_module.CourseRep = course_representative
-
-    db_session.add(student_module)
-    db_session.commit()
-
 # Delete Functions
 
 
@@ -161,6 +173,28 @@ def delete_module(module_id):
     delete_all_professors_from_module(module_id)
     db_session.query(CourseModule).filter(CourseModule.ModuleID == module_id).delete()
     db_session.commit
+
+
+def delete_exam(exam_id):
+    db_session.query(Exam).filter(Exam.ExamID == exam_id).delete()
+    db_session.commit
+
+
+def toggle_exam(exam_id, enabled):
+    exam = db_session.query(Exam).filter(Exam.ExamID == exam_id).first()
+    if enabled == True and exam.Enabled == False:
+        exam.Enabled = True
+    elif enabled == False and exam.Enabled == True:
+        exam.Enabled = False
+
+
+def toggle_question(question_template_id, enabled):
+    question = db_session.query(Question).filter(Question.QuestionTemplateID == question_template_id).first()
+    if enabled == True and question.Enabled == False:
+        question.Enabled = True
+    elif enabled == False and question.Enabled == True:
+        question.Enabled = False
+
 
 
 

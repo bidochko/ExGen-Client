@@ -49,7 +49,7 @@ class CourseModule(Base):
     ModuleID = Column(Integer, autoincrement=True, primary_key=True, unique=True, nullable=False)
     ModuleName = Column(String(128), nullable=False, unique=True)
     ModuleDescription = Column(String(128))
-    ModuleCode = Column(Integer, unique=True, nullable=False)
+    ModuleCode = Column(String(10), unique=True, nullable=False)
     Exam = relationship('Exam')
     StudentModule = relationship('StudentModule')
     ProfessorModule = relationship('ProfessorModule')

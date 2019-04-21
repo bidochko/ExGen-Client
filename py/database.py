@@ -3,6 +3,7 @@ from models import *
 db_session = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=False,
                                          bind=engine))
+# Creation functions
 
 
 def _create_user(username, pw_hash, pw_salt):
@@ -13,7 +14,8 @@ def _create_user(username, pw_hash, pw_salt):
     db_session.add(user)
     db_session.commit()
     return user
-# private method
+
+    # private method
 
 
 def create_student(username, pw_hash, pw_salt):
@@ -33,6 +35,31 @@ def create_professor(username, pw_hash, pw_salt, professor_name, professor_info)
     professor.ProfessorInfo = professor_info
     db_session.add(professor)
     db_session.commit()
+
+
+def add_professor_to_module(professor_id, module_id, head_professor):
+    professor_module = ProfessorModule()
+    professor_module.ProfessorID = professor_id
+    professor_module.ModuleID = module_id
+    professor_module.HeadProfessor = head_professor
+
+    db_session.add(professor_module)
+    db_session.commit()
+
+
+def create_module_given_head_professor(professor_id, module_name, module_description, module_code):
+    module = CourseModule()
+    module.ModuleName = module_name
+    module.ModuleDescription = module_description
+    module.ModuleCode = module_code
+
+    db_session.add(module)
+    db_session.commit()
+
+    module_id = get_module_id_from_module_code(module_code)
+    add_professor_to_module(professor_id, module_id, True)
+
+# Get Functions
 
 
 def get_user_from_user_id(user_id):
@@ -60,27 +87,39 @@ def get_module_id_from_module_code(module_code):
     return module.ModuleID
 
 
-def add_professor_to_module(professor_id, module_id, head_professor):
-    professor_module = ProfessorModule()
-    professor_module.ProfessorID = professor_id
-    professor_module.ModuleID = module_id
-    professor_module.HeadProfessor = head_professor
+def get_module_id_from_student_id(student_id):
+    module = db_session.query(StudentModule).filter(StudentModule.StudentID == student_id)
+    return module
 
-    db_session.add(professor_module)
-    db_session.commit()
+    # Returns a list of ModuleIDs
 
 
-def create_module_given_head_professor(professor_id, module_name, module_description, module_code):
-    module = CourseModule()
-    module.ModuleName = module_name
-    module.ModuleDescription = module_description
-    module.ModuleCode = module_code
+def get_module_id_from_professor_id(professor_id):
+    module = db_session.query(ProfessorModule).filter(ProfessorModule.ProfessorID == professor_id)
+    return module
 
-    db_session.add(module)
-    db_session.commit()
+    # Returns a list of ModuleIDs
 
-    module_id = get_module_id_from_module_code(module_code)
-    add_professor_to_module(professor_id, module_id, True)
+
+def get_module_from_module_id(module_id):
+    module = db_session.query(CourseModule).filter(CourseModule.ModuleID == module_id)
+    return module
+
+    # Returns list containing all parts of the module
+
+
+def get_all_available_modules():
+    module = db_session.query(CourseModule)
+    return module
+
+
+def get_full_module_list_from_student_id(student_id):
+    module_id_list = get_module_id_from_student_id(student_id)
+    module_list = []
+    for module_id in module_id_list:
+        module = db_session.query(CourseModule).filter(CourseModule.ModuleID == module_id).first()
+        module_list.extend(module)
+    return module_list
 
 
 def add_student_to_module(student_id, module_id, course_representative):
@@ -92,31 +131,7 @@ def add_student_to_module(student_id, module_id, course_representative):
     db_session.add(student_module)
     db_session.commit()
 
-
-def get_module_id_from_student_id(student_id):
-    module = db_session.query(StudentModule).filter(StudentModule.StudentID == student_id)
-    return module
-
-# Returns a list of ModuleIDs
-
-
-def get_module_id_from_professor_id(professor_id):
-    module = db_session.query(ProfessorModule).filter(ProfessorModule.ProfessorID == professor_id)
-    return module
-
-# Returns a list of ModuleIDs
-
-
-def get_module_from_module_id(module_id):
-    module = db_session.query(CourseModule).filter(CourseModule.ModuleID == module_id)
-    return module
-
-# Returns list containing all parts of the module
-
-
-def get_all_available_modules():
-    module = db_session.query(CourseModule)
-    return module
+# Delete Functions
 
 
 def delete_one_student_from_module(student_id, module_id):
@@ -128,8 +143,8 @@ def delete_one_professor_from_module(professor_id, module_id):
     db_session.query(ProfessorModule).filter(ProfessorModule.ProfessorID == professor_id, ProfessorModule.ModuleID == module_id).delete()
     db_session.commit
 
+    # Think about any difference for head professors
 
-# Think about any difference for head professors
 
 def delete_all_students_from_module(module_id):
     db_session.query(StudentModule).filter(StudentModule.ModuleID == module_id).delete()
@@ -148,12 +163,6 @@ def delete_module(module_id):
     db_session.commit
 
 
-def get_full_module_list_from_student_id(student_id):
-    module_id_list = get_module_id_from_student_id(student_id)
-    module_list = []
-    for module_id in module_id_list:
-        module = db_session.query(CourseModule).filter(CourseModule.ModuleID == module_id).first()
-        module_list.extend(module)
-    return module_list
+
 
 

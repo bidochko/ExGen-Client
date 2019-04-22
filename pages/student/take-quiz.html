@@ -1,6 +1,19 @@
-<html>
-    <input type="submit" name="answer1" value="{{ question.answer1 }}">
-    <input type="submit" name="answer2" value="{{ question.answer2 }}">
-    <input type="submit" name="answer3" value="{{ question.answer3 }}">
-    <input type="submit" name="answer4" value="{{ question.answer4 }}">    
-</html>
+<form name="questions" class="questions" action="/quiz/" method="POST">
+    <li>
+      <input type="radio" name="question_option" id="question_option" value="{{ question.answer1 }}"></input>
+      <label for="{{ question.answer1 }}">{{ question.answer1 }}</label>
+    </li>
+    <li>
+      <input type="radio" name="question_option" id="question_option" value="{{ question.answer2 }}"></input>
+      <label for="{{ question.answer2 }}">{{ question.answer1 }}</label>
+    </li>
+    <li>
+      <input type="radio" name="question_option" id="question_option" value="{{ question.answer3 }}"></input>
+      <label for="{{ question.answer3 }}">{{ question.answer1 }}</label>
+    </li>
+    <li>
+      <input type="radio" name="question_option" id="question_option" value="{{ question.answer4 }}"></input>
+      <label for="{{ question.answer4 }}">{{ question.answer1 }}</label>
+    </li>
+    <button type="submit">Delete</button>
+</form>

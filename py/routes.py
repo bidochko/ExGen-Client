@@ -256,8 +256,10 @@ def settings():
 def course_results():
     return render_template("courserep/courserep-course.html")
 
-# the page that will show when a user is taking a quiz
-@application.route("/quiz", methods=['GET', 'POST'])
+@application.route("/quiz/", methods=['GET', 'POST'])
 @login_required
-def take_quiz():
-    return render_template("student/take-quiz.html")
+def quiz():
+    form = ModuleFormProfessor(request.form)
+    if request.method == "POST" and form.validate():
+        if 'course_code' in request.form: #Deleting a module
+module_code = form.course_code.data

@@ -64,6 +64,7 @@ class Exam(Base):
 
     ModuleID = Column(ForeignKey('CourseModule.ModuleID'), primary_key=False, nullable=False, index=True)
     CourseModule = relationship('CourseModule')
+    Questions = relationship('Question', secondary='Exam_Question')
 
 
 class Question(Base):
@@ -72,6 +73,8 @@ class Question(Base):
     LaTeX = Column(String(128), nullable=False)
     SolutionCode = Column(String(128), nullable=False)
     Enabled = Column(Boolean, nullable=False)
+
+    Exams = relationship('Exam', secondary='Exam_Question')
 
 
 class Variable(Base):

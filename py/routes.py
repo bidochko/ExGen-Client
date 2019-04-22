@@ -255,3 +255,9 @@ def settings():
 @login_required
 def course_results():
     return render_template("courserep/courserep-course.html")
+
+# the page that will show when a user is taking a quiz
+@application.route("/quiz", methods=['GET', 'POST'])
+@login_required
+def take_quiz():
+    return render_template("student/take-quiz.html")

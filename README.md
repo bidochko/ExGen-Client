@@ -11,3 +11,9 @@ todo list:
 - [ ] exam codes
 - [ ] results code
 - [ ] search bars for modules
+
+secret.txt is the file containing all the passwords / usernames
+secret.txt looks like:
+> brandon@skerritt.tech\n
+> thisIsMyPassword\n
+where \n is an actual new line (not the charecters)

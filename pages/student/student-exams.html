@@ -39,9 +39,11 @@
             {% if course_code == "NULL" %}
               <p2><i>No modules registered</p2></i>
             {% else %}
+              {% set course_name = '' %}
               {% for module in modules %}
                 {% for row in module %}
                   {% if course_code == row[3] %}
+                    {% set course_name = row[1] %}
                     <li>
                       <input type="radio" name="module_buttons" onchange='this.form.submit();' id="{{row[3]}}" value="{{row[3]}}" checked="checked"></input>
                       <label for="{{row[3]}}"><p2>{{row[3]}}</p2></label>
@@ -54,6 +56,7 @@
                   {% endif %}
                 {% endfor %}
               {% endfor %}
+              <p3><b>{{ course_name }}</p3></b>
             {% endif %}
           </form>
         </ul>

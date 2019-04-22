@@ -81,6 +81,17 @@ def create_exam(module_id, title, description, enabled):
     db_session.commit()
 
 
+def create_question(latex_value, solution_code, enabled, exam_id):
+    question = Question()
+    question.LaTeX = latex_value
+    question.SolutionCode = solution_code
+    question.Enabled = enabled
+    # db_session.add()
+
+    exam = db_session.query(Exam).filter(Exam.ExamID == exam_id).first()
+    exam.Questions.append(question)
+    db_session.commit()
+
 # Get Functions
 
 
@@ -147,37 +158,38 @@ def get_full_module_list_from_student_id(student_id):
 
 
 def delete_one_student_from_module(student_id, module_id):
-    db_session.query(StudentModule).filter(StudentModule.StudentID == student_id, StudentModule.ModuleID == module_id).delete()
-    db_session.commit
+    student = db_session.query(StudentModule).filter(StudentModule.StudentID == student_id, StudentModule.ModuleID == module_id).first()
+    db_session.delete(student)
+    db_session.commit()
 
 
 def delete_one_professor_from_module(professor_id, module_id):
     db_session.query(ProfessorModule).filter(ProfessorModule.ProfessorID == professor_id, ProfessorModule.ModuleID == module_id).delete()
-    db_session.commit
+    db_session.commit()
 
     # Think about any difference for head professors
 
 
 def delete_all_students_from_module(module_id):
     db_session.query(StudentModule).filter(StudentModule.ModuleID == module_id).delete()
-    db_session.commit
+    db_session.commit()
 
 
 def delete_all_professors_from_module(module_id):
     db_session.query(ProfessorModule).filter(ProfessorModule.ModuleID == module_id).delete()
-    db_session.commit
+    db_session.commit()
 
 
 def delete_module(module_id):
     delete_all_students_from_module(module_id)
     delete_all_professors_from_module(module_id)
     db_session.query(CourseModule).filter(CourseModule.ModuleID == module_id).delete()
-    db_session.commit
+    db_session.commit()
 
 
 def delete_exam(exam_id):
     db_session.query(Exam).filter(Exam.ExamID == exam_id).delete()
-    db_session.commit
+    db_session.commit()
 
 
 def toggle_exam(exam_id, enabled):

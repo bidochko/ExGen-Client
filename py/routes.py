@@ -118,11 +118,9 @@ def register():
             flash("Email is already registered")
             return render_template('register.html', form=form)
         else:
-            database.create_student(thwart(username), thwart(password), randomSalt)
+            database.create_student(thwart(username), thwart(password), randomSalt, thwart(studentid))
         return redirect(url_for('index'))
     return render_template("register.html", form=form)
-
-
 
 #Cookies
 @application.route("/cookies/", methods=['GET', 'POST'])
@@ -135,21 +133,15 @@ def handle_404(e):
     return redirect(url_for('index'))
 
 
-
 #Home
 @application.route("/home/", methods=['GET', 'POST'])
 @login_required
 def home():
     if(session['usertype'] == "student"): #Student Home
-        conn, trans = connect()
-        moduleids = conn.execute("SELECT * FROM StudentModule WHERE StudentID = {}".format(session['studentid']))
-        module_list = tuple(conn.execute("SELECT * FROM Module WHERE ModuleID = {}".format(x[1])) for x in moduleids)
-        module_list = database.get_full_module_list_from_student_id(student_id)
+        module_list = database.get_full_module_list_from_student_id(session['studentid'])
         return render_template("student/student-home.html", modules=module_list)
     elif(session['usertype'] == "courserep"): #Course Rep home
-        conn, trans = connect()
-        moduleids = conn.execute("SELECT * FROM StudentModule WHERE StudentID = {}".format(session['studentid']))
-        module_list = tuple(conn.execute("SELECT * FROM Module WHERE ModuleID = {}".format(x[1])) for x in moduleids)
+        module_list = database.get_full_module_list_from_student_id(session['studentid'])
         return render_template("courserep/courserep-home.html", modules=module_list)
     elif(session['usertype'] == "professor"): #Professor home
         #Slight difference with professors as we get the modules that they have created
@@ -158,9 +150,7 @@ def home():
         module_list = tuple(conn.execute("SELECT * FROM Module WHERE ModuleID = {}".format(x[1])) for x in moduleids)
         return render_template("professor/professor-home.html", modules=module_list)
     elif(session['usertype'] == "admin"): #Admin home
-        conn, trans = connect()
-        moduleids = conn.execute("SELECT * FROM StudentModule WHERE StudentID = {}".format(session['studentid']))
-        module_list = tuple(conn.execute("SELECT * FROM Module WHERE ModuleID = {}".format(x[1])) for x in moduleids)
+        module_list = database.get_full_module_list_from_student_id(session['studentid'])
         return render_template("admin/admin-home.html", modules=module_list)
     else: #temp redirect for other user
         return redirect(url_for('logout'))
@@ -180,58 +170,39 @@ class ModuleFormProfessor(Form):
 @application.route("/modules/", methods=['GET', 'POST'])
 @login_required
 def modules():
-    conn, trans = connect() #Connect to MySQL
-    modules_available = conn.execute("SELECT * FROM Module") #Get all modules
-
     if(session['usertype'] == "professor"): #professor
         form = ModuleFormProfessor(request.form)
         if request.method == "POST" and form.validate():
             if 'course_code' in request.form: #Deleting a module
                 module_code = form.course_code.data
-                for row in modules_available:                #Getting module_id from COMPXXX
-                    if row[3] == module_code:
-                        module_id = row[0]
-                conn.execute("DELETE FROM Module WHERE ModuleID=%s", module_id) #Delete the module from module table
-                conn.execute("DELETE FROM StudentModule WHERE ModuleID=%s", module_id) #Delete every student module entry
-                conn.execute("DELETE FROM ProfessorModule WHERE ModuleID=%s", module_id) #Delete the professor module entry
-                trans.commit() #commit transaction
+                for row in modules_all:                #Getting module_id from COMPXXX
+                    if row.ModuleCode == module_code:
+                        module_id = row.ModuleID
+                database.delete_module(module_id)
+                database.delete_all_students_from_module(module_id)
+                database.delete_all_professors_from_module(module_id)
     else: #every other user
+        
         form = ModuleFormStudent(request.form)               #Form for the opt-in/out buttons
         if request.method == "POST" and form.validate():     #if button is pressed
+            modules_all = database.get_all_available_modules()
             if 'opt_out_course_code' in request.form:        #Opt-out button was pressed
                 module_code = form.opt_out_course_code.data  #Get module button id
-                for row in modules_available:                #Getting module_id from COMPXXX
-                    if row[3] == module_code:
-                        module_id = row[0]
-                conn.execute("DELETE FROM StudentModule WHERE StudentID=%s AND ModuleID=%s", (session['studentid'], module_id)) #Delete query from StudentModule table
-                trans.commit() #Commit transaction
+                for row in modules_all:                #Getting module_id from COMPXXX
+                    if row.ModuleCode == module_code:
+                        module_id = row.ModuleID
+                database.delete_one_student_from_module(session['studentid'], module_id)
             elif 'opt_in_course_code' in request.form:
                 module_code = form.opt_in_course_code.data #same as above but for opt-in
-                meme = "test"
-                for row in modules_available:
-                    if row[3] == module_code:
-                        module_id = row[0]
-                #here we need to check if the student is already optted into the chosen module
-                #What would be better here would be if we only display true available modules
-                student_modules = conn.execute("SELECT * FROM StudentModule WHERE StudentID = {}".format(session['studentid'])) #get students registered modules
-                already_added = False #boolean for check
-                for module in student_modules: #loop through all and check if module_id is in this list
-                    if module[1] == module_id:
-                        already_added = True
-                if already_added == False:
-                    #If module is not in the list, add it to the list
-                    conn.execute("INSERT INTO StudentModule VALUES (%s, %s)", (session['studentid'], module_id))
-                    trans.commit()
-                else:
-                    #Flash an error message otherwise
-                    flash("Module already added")
-
+                for row in modules_all:
+                    if row.ModuleCode == module_code:
+                        module_id = row.ModuleID
+                database.add_student_to_module(session['studentid'], module_id, 0)
 
     #Get registered modules and available modules
     if(session['usertype'] == "student"):
-        moduleids = conn.execute("SELECT * FROM StudentModule WHERE StudentID = {}".format(session['studentid']))
-        modules_reg = tuple(conn.execute("SELECT * FROM Module WHERE ModuleID = {}".format(x[1])) for x in moduleids)
-        modules_available = conn.execute("SELECT * FROM Module")
+        modules_reg = database.get_full_module_list_from_student_id(session['studentid'])
+        modules_available = database.get_available_modules(session['studentid'])
         return render_template("student/student-module.html", modules_reg=modules_reg, modules_available=modules_available)
     elif(session['usertype'] == "courserep"): #Course Rep home
         moduleids = conn.execute("SELECT * FROM StudentModule WHERE StudentID = {}".format(session['studentid']))

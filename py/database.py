@@ -92,49 +92,52 @@ def create_question(latex_value, solution_code, enabled, exam_id):
     exam.Questions.append(question)
     db_session.commit()
 
+
+def create_variable():
+
 # Get Functions
 
 
-def get_user_from_user_id(user_id):
+def get_user_given_user_id(user_id):
     user = db_session.query(User).filter(User.UserID == user_id).first()
     return user
 
 
-def get_user_from_user_name(user_name):
+def get_user_given_user_name(user_name):
     user = db_session.query(User).filter(User.UserName == user_name).first()
     return user
 
 
-def get_student_from_user_id(user_id):
+def get_student_given_user_id(user_id):
     student = db_session.query(Student).filter(Student.UserID == user_id).first()
     return student
 
 
-def get_professor_from_user_id(user_id):
+def get_professor_given_user_id(user_id):
     professor = db_session.query(Professor).filter(Professor.UserID == user_id).first()
     return professor
 
 
-def get_module_id_from_module_code(module_code):
+def get_module_id_given_module_code(module_code):
     module = db_session.query(CourseModule).filter(CourseModule.ModuleCode == module_code).first()
     return module.ModuleID
 
 
-def get_module_id_from_student_id(student_id):
+def get_module_id_given_student_id(student_id):
     module = db_session.query(StudentModule).filter(StudentModule.StudentID == student_id)
     return module
 
     # Returns a list of ModuleIDs
 
 
-def get_module_id_from_professor_id(professor_id):
+def get_module_id_given_professor_id(professor_id):
     module = db_session.query(ProfessorModule).filter(ProfessorModule.ProfessorID == professor_id)
     return module
 
     # Returns a list of ModuleIDs
 
 
-def get_module_from_module_id(module_id):
+def get_module_given_module_id(module_id):
     module = db_session.query(CourseModule).filter(CourseModule.ModuleID == module_id)
     return module
 
@@ -146,13 +149,9 @@ def get_all_available_modules():
     return module
 
 
-def get_full_module_list_from_student_id(student_id):
-    module_id_list = get_module_id_from_student_id(student_id)
-    module_list = []
-    for module_id in module_id_list:
-        module = db_session.query(CourseModule).filter(CourseModule.ModuleID == module_id.ModuleID).first()
-        module_list.extend([module])
-    return module_list
+def get_full_module_list_given_student_id(student_id):
+    student = get_student_given_student_id(student_id)
+    return student.StudentModule_List()
 
 
 def get_available_modules_given_student_id(student_id):
@@ -167,6 +166,19 @@ def get_available_modules_given_student_id(student_id):
         if inlist == False:
             available_modules.extend([module])
     return available_modules
+
+
+def get_questions_given_exam_id(exam_id):
+    exam = db_session.query(Exam).filter(Exam.ExamID == exam_id).first()
+    return exam.Questions()
+
+    # returns a list
+
+
+def get_student_given_student_id(student_id):
+    student = db_session.query(Student).filter(Student.StudentID == student_id).first()
+    return student
+
 
 # Delete Functions
 

@@ -83,8 +83,8 @@ def create_exam(module_id, title, description, enabled):
     db_session.commit()
 
 
-def create_question(latex_value, solution_code, enabled, exam_id):
-    question = Question()
+def create_question_template(latex_value, solution_code, enabled, exam_id):
+    question = QuestionTemplate()
     question.LaTeX = latex_value
     question.SolutionCode = solution_code
     question.Enabled = enabled
@@ -229,7 +229,7 @@ def toggle_exam(exam_id, enabled):
 
 
 def toggle_question(question_template_id, enabled):
-    question = db_session.query(Question).filter(Question.QuestionTemplateID == question_template_id).first()
+    question = db_session.query(QuestionTemplate).filter(QuestionTemplate.QuestionTemplateID == question_template_id).first()
     if enabled == True and question.Enabled == False:
         question.Enabled = True
     elif enabled == False and question.Enabled == True:

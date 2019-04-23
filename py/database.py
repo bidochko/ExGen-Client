@@ -66,7 +66,7 @@ def create_module_given_head_professor(professor_id, module_name, module_descrip
     db_session.add(module)
     db_session.commit()
 
-    module_id = get_module_id_from_module_code(module_code)
+    module_id = get_module_id_given_module_code(module_code)
     add_professor_to_module(professor_id, module_id, True)
 
 
@@ -93,7 +93,7 @@ def create_question(latex_value, solution_code, enabled, exam_id):
     db_session.commit()
 
 
-def create_variable():
+# def create_variable():
 
 # Get Functions
 
@@ -155,7 +155,7 @@ def get_full_module_list_given_student_id(student_id):
 
 
 def get_available_modules_given_student_id(student_id):
-    module_id_list = get_module_id_from_student_id(student_id)
+    module_id_list = get_module_id_given_student_id(student_id)
     modules_list = get_all_available_modules()
     available_modules = []
     for module in modules_list:

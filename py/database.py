@@ -1,7 +1,9 @@
+from sqlalchemy import not_
+
 from models import *
 
 db_session = scoped_session(sessionmaker(autocommit=False,
-                                         autoflush=False,
+                                         autoflush=True,
                                          bind=engine))
 # Creation functions
 
@@ -123,7 +125,7 @@ def get_module_id_given_module_code(module_code):
     return module.ModuleID
 
 
-def get_module_id_given_student_id(student_id):
+def get_modules_given_student_id(student_id):
     module = db_session.query(StudentModule).filter(StudentModule.StudentID == student_id)
     return module
 
@@ -155,7 +157,7 @@ def get_full_module_list_given_student_id(student_id):
 
 
 def get_available_modules_given_student_id(student_id):
-    module_id_list = get_module_id_given_student_id(student_id)
+    module_id_list = get_modules_given_student_id(student_id)
     modules_list = get_all_available_modules()
     available_modules = []
     for module in modules_list:

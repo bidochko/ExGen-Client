@@ -68,7 +68,7 @@ class Exam(Base):
 
 
 class QuestionTemplate(Base):
-    __tablename__ = "Question"
+    __tablename__ = "QuestionTemplate"
     QuestionTemplateID = Column(Integer, autoincrement=True, primary_key=True, unique=True, nullable=False)
     LaTeX = Column(String(128), nullable=False)
     SolutionCode = Column(String(128), nullable=False)
@@ -128,7 +128,7 @@ class ProfessorModule(Base):
 t_Exam_Question = Table(
     'Exam_Question', metadata,
     Column('ExamID', ForeignKey('Exam.ExamID'), primary_key=True, nullable=False, index=True),
-    Column('QuestionTemplateID', ForeignKey('Question.QuestionTemplateID'), primary_key=True, nullable=False,
+    Column('QuestionTemplateID', ForeignKey('QuestionTemplate.QuestionTemplateID'), primary_key=True, nullable=False,
            index=True)
 )
 

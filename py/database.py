@@ -150,9 +150,23 @@ def get_full_module_list_from_student_id(student_id):
     module_id_list = get_module_id_from_student_id(student_id)
     module_list = []
     for module_id in module_id_list:
-        module = db_session.query(CourseModule).filter(CourseModule.ModuleID == module_id).first()
-        module_list.extend(module)
+        module = db_session.query(CourseModule).filter(CourseModule.ModuleID == module_id.ModuleID).first()
+        module_list.extend([module])
     return module_list
+
+
+def get_available_modules_given_student_id(student_id):
+    module_id_list = get_module_id_from_student_id(student_id)
+    modules_list = get_all_available_modules()
+    available_modules = []
+    for module in modules_list:
+        inlist = False
+        for student_module in module_id_list:
+            if module.ModuleID == student_module.ModuleID:
+                inlist = True
+        if inlist == False:
+            available_modules.extend([module])
+    return available_modules
 
 # Delete Functions
 

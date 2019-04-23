@@ -19,7 +19,7 @@ class User(Base):
     Salt = Column(String(128), nullable=False)
     Professor = relationship("Professor", uselist=False)
     Student = relationship("Student", uselist=False)
-    Answered = relationship("Answered")
+    Answered_List = relationship("Answered")
 
 
 class Professor(Base):
@@ -29,8 +29,8 @@ class Professor(Base):
     ProfessorInfo = Column(String(128))
 
     UserID = Column(ForeignKey('User.UserID'), primary_key=False, nullable=False, index=True)
-    User = relationship('User')
-    ProfessorModule = relationship('ProfessorModule')
+    User = relationship('User', uselist=False)
+    ProfessorModule_List = relationship('ProfessorModule')
 
 
 
@@ -40,8 +40,8 @@ class Student(Base):
     isCourseRep = Column(Boolean, nullable=False)
 
     UserID = Column(ForeignKey('User.UserID'), primary_key=False, nullable=False, index=True)
-    User = relationship('User')
-    StudentModule = relationship('StudentModule')
+    User = relationship('User', uselist=False)
+    StudentModule_List = relationship('StudentModule')
 
 
 class CourseModule(Base):
@@ -50,9 +50,9 @@ class CourseModule(Base):
     ModuleName = Column(String(128), nullable=False, unique=True)
     ModuleDescription = Column(String(128))
     ModuleCode = Column(String(10), unique=True, nullable=False)
-    Exam = relationship('Exam')
-    StudentModule = relationship('StudentModule')
-    ProfessorModule = relationship('ProfessorModule')
+    Exams = relationship('Exam')
+    StudentModule_List = relationship('StudentModule')
+    ProfessorModule_List = relationship('ProfessorModule')
 
 
 class Exam(Base):
@@ -82,6 +82,9 @@ class Variable(Base):
     VariableID = Column(Integer, autoincrement=True, primary_key=True, unique=True, nullable=False)
     VariableName = Column(String(32), nullable=False)
     VariableValue = Column(Integer, nullable=False)
+
+    Answered_List = relationship('Answered', secondary='Variable_Question')
+    Question = relationship('Answered', secondary='Variable_Question')
 
 
 class Answered(Base):

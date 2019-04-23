@@ -64,10 +64,10 @@ class Exam(Base):
 
     ModuleID = Column(ForeignKey('CourseModule.ModuleID'), primary_key=False, nullable=False, index=True)
     CourseModule = relationship('CourseModule')
-    Questions = relationship('Question', secondary='Exam_Question')
+    Questions = relationship('QuestionTemplate', secondary='Exam_Question')
 
 
-class Question(Base):
+class QuestionTemplate(Base):
     __tablename__ = "Question"
     QuestionTemplateID = Column(Integer, autoincrement=True, primary_key=True, unique=True, nullable=False)
     LaTeX = Column(String(128), nullable=False)
@@ -75,6 +75,7 @@ class Question(Base):
     Enabled = Column(Boolean, nullable=False)
 
     Exams = relationship('Exam', secondary='Exam_Question')
+    Answered = relationship("Answered")
 
 
 class Variable(Base):
@@ -83,8 +84,9 @@ class Variable(Base):
     VariableName = Column(String(32), nullable=False)
     VariableValue = Column(Integer, nullable=False)
 
-    Answered_List = relationship('Answered', secondary='Variable_Question')
-    Question = relationship('Answered', secondary='Variable_Question')
+    QuestionID = Column(ForeignKey('Answered.QuestionID'), primary_key=False, nullable=False, index=True)
+    Answered = relationship("Answered")
+
 
 
 class Answered(Base):
@@ -94,6 +96,9 @@ class Answered(Base):
 
     UserID = Column(ForeignKey('User.UserID'), primary_key=False, nullable=False, index=True)
     User = relationship("User")
+    QuestionTemplateID = Column(ForeignKey('QuestionTemplate.QuestionTemplateID'), primary_key=False, nullable=False, index=True)
+    QuestionTemplate = relationship("QuestionTemplate")
+    Variable = relationship("Variable")
 
 
 class StudentModule(Base):
@@ -125,14 +130,6 @@ t_Exam_Question = Table(
     Column('ExamID', ForeignKey('Exam.ExamID'), primary_key=True, nullable=False, index=True),
     Column('QuestionTemplateID', ForeignKey('Question.QuestionTemplateID'), primary_key=True, nullable=False,
            index=True)
-)
-
-t_Variable_Question = Table(
-    'Variable_Question', metadata,
-    Column('VariableID', ForeignKey('Variable.VariableID'), primary_key=True, nullable=False, index=True),
-    Column('QuestionTemplateID', ForeignKey('Question.QuestionTemplateID'), primary_key=True, nullable=False,
-           index=True),
-    Column('QuestionID', ForeignKey('Answered.QuestionID'), primary_key=True, nullable=False, index=True)
 )
 
 metadata.create_all(bind=engine)

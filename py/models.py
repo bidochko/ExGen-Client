@@ -33,7 +33,6 @@ class Professor(Base):
     ProfessorModule_List = relationship('ProfessorModule')
 
 
-
 class Student(Base):
     __tablename__ = "Student"
     StudentID = Column(Integer, primary_key=True, unique=True, nullable=False)

@@ -20,18 +20,20 @@ def _create_user(username, pw_hash, pw_salt):
     # private method
 
 
-def create_student(username, pw_hash, pw_salt):
+def create_student(username, pw_hash, pw_salt, student_id):
     user = _create_user(username, pw_hash, pw_salt)
     student = Student()
+    student.StudentID = student_id
     student.UserID = user.UserID
     student.isCourseRep = False
     db_session.add(student)
     db_session.commit()
 
 
-def create_professor(username, pw_hash, pw_salt, professor_name, professor_info):
+def create_professor(username, pw_hash, pw_salt, professor_name, professor_info, professor_id):
     user = _create_user(username, pw_hash, pw_salt)
     professor = Professor()
+    professor.ProfessorID = professor_id
     professor.UserID = user.UserID
     professor.ProfessorName = professor_name
     professor.ProfessorInfo = professor_info
@@ -115,6 +117,9 @@ def create_question(user_id, question_template_id, correct):
 
 # Thought - could create variable when making question but need to know layout for that
 # Eg how many variables or a way to do it easily, will leave separate for now
+
+
+#def create_question_answered()
 
 
 # Get Functions

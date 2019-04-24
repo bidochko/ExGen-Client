@@ -119,7 +119,7 @@ def create_question(user_id, question_template_id, correct):
 # Eg how many variables or a way to do it easily, will leave separate for now
 
 
-#def create_question_answered()
+# def create_question_answered()
 
 
 # Get Functions
@@ -153,35 +153,33 @@ def get_module_id_given_module_code(module_code):
 
 
 def get_modules_given_student_id(student_id):
-    module = db_session.query(StudentModule).filter(StudentModule.StudentID == student_id)
+    module = db_session.query(StudentModule).filter(StudentModule.StudentID == student_id).all()
     return module
 
     # Returns a list of ModuleIDs
 
 
 def get_module_id_given_professor_id(professor_id):
-    module = db_session.query(ProfessorModule).filter(ProfessorModule.ProfessorID == professor_id)
+    module = db_session.query(ProfessorModule).filter(ProfessorModule.ProfessorID == professor_id).all()
     return module
 
     # Returns a list of ModuleIDs
 
 
 def get_module_given_module_id(module_id):
-    module = db_session.query(CourseModule).filter(CourseModule.ModuleID == module_id)
+    module = db_session.query(CourseModule).filter(CourseModule.ModuleID == module_id).first()
     return module
-
-    # Returns list containing all parts of the module
 
 
 def get_all_available_modules():
-    module = db_session.query(CourseModule)
+    module = db_session.query(CourseModule).all()
     return module
 
 
 def get_full_module_list_given_student_id(student_id):
     student = get_student_given_student_id(student_id)
     if student:
-        return student.StudentModule_List()
+        return student.StudentModule_List
     return None
 
 
@@ -202,7 +200,7 @@ def get_available_modules_given_student_id(student_id):
 def get_questions_given_exam_id(exam_id):
     exam = db_session.query(Exam).filter(Exam.ExamID == exam_id).first()
     if exam:
-        return exam.Questions()
+        return exam.Questions
     return None
 
     # returns a list

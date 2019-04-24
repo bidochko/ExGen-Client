@@ -211,6 +211,20 @@ def get_student_given_student_id(student_id):
     return student
 
 
+def get_modules_list_given_student_id(student_id):
+    module_id_list = get_modules_given_student_id(student_id)
+    modules_list = get_all_available_modules()
+    student_modules_list = []
+    for module in modules_list:
+        inlist = False
+        for student_module in module_id_list:
+            if module.ModuleID == student_module.ModuleID:
+                inlist = True
+        if inlist:
+            student_modules_list.extend([module])
+    return student_modules_list
+
+
 # Delete Functions
 
 

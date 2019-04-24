@@ -19,7 +19,7 @@ class User(Base):
     Salt = Column(String(128), nullable=False)
     Professor = relationship("Professor", uselist=False)
     Student = relationship("Student", uselist=False)
-    Answered_List = relationship("Answered")
+    Question_List = relationship("Question")
 
 
 class Professor(Base):
@@ -75,7 +75,7 @@ class QuestionTemplate(Base):
     Enabled = Column(Boolean, nullable=False)
 
     Exams = relationship('Exam', secondary='Exam_Question')
-    Answered = relationship("Answered")
+    Question = relationship("Question")
 
 
 class Variable(Base):
@@ -84,21 +84,29 @@ class Variable(Base):
     VariableName = Column(String(32), nullable=False)
     VariableValue = Column(Integer, nullable=False)
 
-    QuestionID = Column(ForeignKey('Answered.QuestionID'), primary_key=False, nullable=False, index=True)
-    Answered = relationship("Answered")
+    QuestionID = Column(ForeignKey('Question.QuestionID'), primary_key=False, nullable=False, index=True)
+    Question = relationship("Question")
 
 
 
-class Answered(Base):
-    __tablename__ = "Answered"
+class Question(Base):
+    __tablename__ = "Question"
     QuestionID = Column(Integer, autoincrement=True, primary_key=True, unique=True, nullable=False)
-    Correct = Column(Boolean, nullable=False)
 
-    UserID = Column(ForeignKey('User.UserID'), primary_key=False, nullable=False, index=True)
-    User = relationship("User")
     QuestionTemplateID = Column(ForeignKey('QuestionTemplate.QuestionTemplateID'), primary_key=False, nullable=False, index=True)
     QuestionTemplate = relationship("QuestionTemplate")
     Variable = relationship("Variable")
+    AnsweredQuestion = relationship("AnsweredQuestion")
+
+
+class AnsweredQuestion(Base):
+    __tablename__ = "AnsweredQuestion"
+    Correct = Column(Boolean, nullable=False)
+
+    UserID = Column(ForeignKey('User.UserID'), primary_key=True, nullable=False, index=True)
+    User = relationship("User")
+    QuestionID = Column(ForeignKey('Question.QuestionID'), primary_key=True, nullable=False, index=True)
+    Question = relationship("Question")
 
 
 class StudentModule(Base):

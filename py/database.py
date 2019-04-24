@@ -95,7 +95,27 @@ def create_question_template(latex_value, solution_code, enabled, exam_id):
     db_session.commit()
 
 
-# def create_variable():
+def create_variable(variable_name, variable_value, question_id):
+    variable = Variable()
+    variable.VariableName = variable_name
+    variable.VariableValue = variable_value
+    variable.QuestionID = question_id
+    db_session.add(variable)
+    db_session.commit()
+
+
+def create_question(user_id, question_template_id, correct):
+    question = Question()
+    question.UserID = user_id
+    question.QuestionTemplateID = question_template_id
+    question.Correct = correct
+    db_session.add(question)
+    db_session.commit()
+
+
+# Thought - could create variable when making question but need to know layout for that
+# Eg how many variables or a way to do it easily, will leave separate for now
+
 
 # Get Functions
 
@@ -226,6 +246,9 @@ def delete_exam(exam_id):
     db_session.commit()
 
 
+# Misc
+
+
 def toggle_exam(exam_id, enabled):
     exam = db_session.query(Exam).filter(Exam.ExamID == exam_id).first()
     if enabled == True and exam.Enabled == False:
@@ -242,6 +265,12 @@ def toggle_question(question_template_id, enabled):
         question.Enabled = False
 
 
+def check_user_completed_question(question_id, student_id):
+    question = db_session.query(Question).filter(Question.QuestionID == question_id).first()
+    if question.Enabled:
+        return True
+    else:
+        return False
 
 
 

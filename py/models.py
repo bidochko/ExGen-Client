@@ -19,7 +19,7 @@ class User(Base):
     Salt = Column(String(128), nullable=False)
     Professor = relationship("Professor", uselist=False)
     Student = relationship("Student", uselist=False)
-    Question_List = relationship("Question")
+    AnsweredQuestion_List = relationship("AnsweredQuestion")
 
 
 class Professor(Base):

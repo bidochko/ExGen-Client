@@ -235,7 +235,8 @@ def delete_one_student_from_module(student_id, module_id):
 
 
 def delete_one_professor_from_module(professor_id, module_id):
-    db_session.query(ProfessorModule).filter(ProfessorModule.ProfessorID == professor_id, ProfessorModule.ModuleID == module_id).delete()
+    professor = db_session.query(ProfessorModule).filter(ProfessorModule.ProfessorID == professor_id, ProfessorModule.ModuleID == module_id).first()
+    db_session.delete(professor)
     db_session.commit()
 
     # Think about any difference for head professors

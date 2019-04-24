@@ -242,24 +242,28 @@ def delete_one_professor_from_module(professor_id, module_id):
 
 
 def delete_all_students_from_module(module_id):
-    db_session.query(StudentModule).filter(StudentModule.ModuleID == module_id).delete()
+    student = db_session.query(StudentModule).filter(StudentModule.ModuleID == module_id).all()
+    db_session.delete(student)
     db_session.commit()
 
 
 def delete_all_professors_from_module(module_id):
-    db_session.query(ProfessorModule).filter(ProfessorModule.ModuleID == module_id).delete()
+    professor = db_session.query(ProfessorModule).filter(ProfessorModule.ModuleID == module_id).all()
+    db_session.delete(professor)
     db_session.commit()
 
 
 def delete_module(module_id):
     delete_all_students_from_module(module_id)
     delete_all_professors_from_module(module_id)
-    db_session.query(CourseModule).filter(CourseModule.ModuleID == module_id).delete()
+    module = db_session.query(CourseModule).filter(CourseModule.ModuleID == module_id).first()
+    db_session.delete(module)
     db_session.commit()
 
 
 def delete_exam(exam_id):
-    db_session.query(Exam).filter(Exam.ExamID == exam_id).delete()
+    exam = db_session.query(Exam).filter(Exam.ExamID == exam_id).first()
+    db_session.delete(exam)
     db_session.commit()
 
 

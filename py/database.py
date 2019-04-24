@@ -122,7 +122,9 @@ def get_professor_given_user_id(user_id):
 
 def get_module_id_given_module_code(module_code):
     module = db_session.query(CourseModule).filter(CourseModule.ModuleCode == module_code).first()
-    return module.ModuleID
+    if module:
+        return module.ModuleID
+    return None
 
 
 def get_modules_given_student_id(student_id):
@@ -153,7 +155,9 @@ def get_all_available_modules():
 
 def get_full_module_list_given_student_id(student_id):
     student = get_student_given_student_id(student_id)
-    return student.StudentModule_List()
+    if student:
+        return student.StudentModule_List()
+    return None
 
 
 def get_available_modules_given_student_id(student_id):
@@ -172,7 +176,9 @@ def get_available_modules_given_student_id(student_id):
 
 def get_questions_given_exam_id(exam_id):
     exam = db_session.query(Exam).filter(Exam.ExamID == exam_id).first()
-    return exam.Questions()
+    if exam:
+        return exam.Questions()
+    return None
 
     # returns a list
 

@@ -142,3 +142,43 @@ img {
   margin-right: auto;
   width: 1000px;
 }
+.registered {
+  position: relative;
+  top: 40px;
+  text-align: left;
+  height: auto;
+}
+.modules {
+  list-style-type:none;
+  text-align: center;
+  margin:25px 0 0 0;
+  padding:0;
+}
+.modules li {
+  float:left;
+  margin:0 5px 0 0;
+  width:90px;
+  height:30px;
+  position:relative;
+}
+.modules label, .modules input {
+  display:block;
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+  bottom:0;
+}
+.modules input[type="radio"] {
+  opacity:0.01;
+  z-index:100;
+}
+.modules input[type="radio"]:checked + label, .Checked + label {
+  background: #00A8A5;
+}
+.modules label {
+  padding: 5px;
+  border-radius: 5px 5px 5px 5px;
+  cursor:pointer;
+  z-index:90;
+}

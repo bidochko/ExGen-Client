@@ -1,0 +1,92 @@
+<html>
+  <head>
+    <title>Home</title>
+    <link rel="shortcut icon" href="{{url_for("static", filename="favicon.png")}}" type="image/x-icon">
+    <link rel="stylesheet" type="text/css" href="{{url_for("static", filename="css/student/home.css")}}">
+    <meta charset="utf-8">
+  </head>
+  <body>
+    <div id="exgen">
+      <div class="barbluetop"></div>
+      <img src="{{url_for("static", filename="exgen_plain.png")}}"></img>
+      <div class="barbluebottom"></div>
+    </div>
+    <div class='menu'>
+      <div id='home'><a href="/home"><button class="menucurrent"><span><p>Home</p></span></button></a></div>
+      <div id='exams'><a href="/exams"><button class="menubutton"><span><p>Exams</p></span></button></a></div>
+      <div id='results'><a href="/results"><button class="menubutton"><span><p>Results</p></span></button></a></div>
+      <div id='settings'><a href="/settings"><button class="menubutton"><span><p>Settings</p></span></button></a></div>
+    </div>
+    <div class='logout'><a href="/logout"><button class="logoutbutton"><span><p>Logout</p></span></button></a></div>
+    <div class="username">{{ session.username }}</div>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        {% for message in messages %}
+          <div class="flashed">
+            <div class="alert alert-info alert-dismissible" role="alert">
+              <p>{{message}}</p>
+            </div>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <div class="main" align="center">
+      <div class="registered2">
+        <p2><b>Registered Modules</b></p2>
+        <div class="table-registered">
+          <table class="table" id="modules_reg">
+            <col width="110px" />
+            <col width="340px" />
+            <thead>
+              <tr>
+                <th scope="col"><p2><b>Course code</b></p2></th>
+                <th scope="col"><p2><b>Course name</b></p2></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for module in modules_registerd %}
+                <tr id={{ module.ModuleCode }}>
+                  <form id="opt-out" name="opt-out" class="opt" action="/modules/" method="POST">
+                    <th scope="row"><input id="opt_out_course_code" name="opt_out_course_code" type="text" value="{{ module.ModuleCode }}" readonly="readonly"></input></th>
+                    <td><p2>{{ module.ModuleName }}</p2></td>
+                    <td><p2><button type="submit" class="opt-button">Opt-out</button></p2></td>
+                  </form>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="available">
+        <p2><b>Available Modules</b></p2>
+        <div class="table-available">
+          <table class="table" id="modules_available">
+            <col width="110px" />
+            <col width="340px" />
+            <thead>
+              <tr>
+                <th scope="col"><p2><b>Course code</b></p2></th>
+                <th scope="col"><p2><b>Course name</b></p2></th>
+              </tr>
+            </thead>
+            <div class="scrollable">
+              <tbody>
+                {% for row in modules_available %}
+                  <tr id={{ row.ModuleCode }}>
+                    <form id="opt-in" name="opt-in" class="opt" action="/modules/" method="POST">
+                      <th scope="row"><input id="opt_in_course_code" name="opt_in_course_code" type="text" value="{{ row.ModuleCode }}" readonly="readonly"></input></th>
+                      <td><p2>{{ row.ModuleName }}</p2></td>
+                      <td><p2><button type="submit" class="opt-button">Opt-in</button></p2></td>
+                    </form>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </div>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </body>
+</html>

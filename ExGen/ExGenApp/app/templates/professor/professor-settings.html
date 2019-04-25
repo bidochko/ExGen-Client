@@ -1,0 +1,77 @@
+<html>
+  <head>
+    <title>Settings</title>
+    <link rel="shortcut icon" href="{{url_for("static", filename="favicon.png")}}" type="image/x-icon">
+    <link rel="stylesheet" type="text/css" href="{{url_for("static", filename="css/professor/settings.css")}}">
+    <meta charset="utf-8">
+  </head>
+  <body>
+    <div id="exgen">
+      <div class="barbluetop"></div>
+      <img src="{{url_for("static", filename="exgen_plain.png")}}"></img>
+      <div class="barbluebottom"></div>
+    </div>
+    <div class='menu'>
+      <div id='home'><a href="/home"><button class="menubutton"><span><p>Home</p></span></button></a></div>
+      <div id='modules'><a href="/modules"><button class="menubutton"><span><p>Modules</p></span></button></a></div>
+      <div id='exams'><a href="/exams"><button class="menubutton"><span><p>Exams</p></span></button></a></div>
+      <div id='course'><a href="/course-results"><button class="menubutton"><span><p>Course Results</p></span></button></a></div>
+      <div id='settings'><a href="/settings"><button class="menucurrent"><span><p>Settings</p></span></button></a></div>
+    </div>
+    <div class='logout'><a href="/logout"><button class="logoutbutton"><span><p>Logout</p></span></button></a></div>
+    <div class="username">{{ session.username }}</div>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        {% for message in messages %}
+          <div class="flashed">
+            <div class="alert alert-info alert-dismissible" role="alert">
+              <p>{{message}}</p>
+            </div>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <div class="main" align="center">
+      <div class="spacer"></div>
+      <div class="reset-password">
+        <div class="segment-name">
+          <p2><b>Reset password</b></p2>
+        </div>
+        <div class="message">
+          <p2>We’ll send a link to reset your password to your email. Implement the button when emailing works.</p2>
+        </div>
+        <form id="reset" name="reset" action="/settings/" method="POST">
+          <input id="btn_reset" name="btn_reset" type="text" readonly="readonly"></input>
+          <button type="submit" class="reset-button"><p2>Reset password</p2></button>
+        </form>
+      </div>
+      <div class="spacer"></div>
+      <div class="delete-account">
+        <div class="segment-name">
+          <p2><b>Delete account</b></p2>
+        </div>
+        <div class="message">
+          <p2>We hate to see you go, but if you do not want to continue using our service and want to delete any data relevant to you then use this to delete your account. We’ll send a confirmation link to your email.</p2>
+        </div>
+        <form id="delete" name="delete" action="/settings/" method="POST">
+          <input id="btn_delete" name="btn_delete" type="text" readonly="readonly"></input>
+          <button type="submit" class="delete-button"><p2>Delete Account</p2></button>
+        </form>
+      </div>
+      <div class="spacer"></div>
+      <div class="verification">
+        <div class="segment-name">
+          <p2><b>Account Verification</b></p2>
+        </div>
+        <div class="message">
+          <p2>Request to be a professor or a course representative for a module.</p2>
+        </div>
+        <form id="verification" name="verification" action="/settings/" method="POST">
+          <input id="btn_verification" name="btn_verification" type="text" readonly="readonly"></input>
+          <button type="submit" class="request-button"><p2>Request</p2></button>
+        </form>
+      </div>
+    </div>
+  </body>
+</html>

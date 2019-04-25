@@ -1,0 +1,5 @@
+db_user = "exgensql"
+db_password = "yKH2T&%u~L5<"
+db_name = "ExGen"
+db_host = "localhost"
+db_port = "3306"

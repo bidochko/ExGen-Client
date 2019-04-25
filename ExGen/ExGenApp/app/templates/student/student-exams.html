@@ -1,0 +1,66 @@
+<html>
+  <head>
+    <title>Exams</title>
+    <link rel="shortcut icon" href="{{url_for("static", filename="favicon.png")}}" type="image/x-icon">
+    <link rel="stylesheet" type="text/css" href="{{url_for("static", filename="css/student/exams.css")}}">
+    <meta charset="utf-8">
+  </head>
+  <body>
+    <div id="exgen">
+      <div class="barbluetop"></div>
+      <img src="{{url_for("static", filename="exgen_plain.png")}}"></img>
+      <div class="barbluebottom"></div>
+    </div>
+    <div class="menu">
+      <div id='home'><a href="/home"><button class="menubutton"><span><p>Home</p></span></button></a></div>
+      <div id='exams'><a href="/exams"><button class="menucurrent"><span><p>Exams</p></span></button></a></div>
+      <div id='results'><a href="/results"><button class="menubutton"><span><p>Results</p></span></button></a></div>
+      <div id='settings'><a href="/settings"><button class="menubutton"><span><p>Settings</p></span></button></a></div>
+    </div>
+    <div class="logout"><a href="/logout"><button class="logoutbutton"><span><p>Logout</p></span></button></a></div>
+    <div class="username">{{ session.username }}</div>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        {% for message in messages %}
+          <div class="flashed">
+            <div class="alert alert-info alert-dismissible" role="alert">
+              <p>{{message}}</p>
+            </div>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <div class="main" align="center">
+      <div class="registered">
+        <p2><b>Registered Modules</b></p2>
+        <ul class="modules">
+          <form name="module_buttons_form" class="module_buttons_form" action="/exams/" method="POST">
+            {% if course_code == "NULL" %}
+              <p2><i>No modules registered</p2></i>
+            {% else %}
+              {% set course_name = '' %}
+              {% for module in modules %}
+                {% for row in module %}
+                  {% if course_code == row[3] %}
+                    {% set course_name = row[1] %}
+                    <li>
+                      <input type="radio" name="module_buttons" onchange='this.form.submit();' id="{{row[3]}}" value="{{row[3]}}" checked="checked"></input>
+                      <label for="{{row[3]}}"><p2>{{row[3]}}</p2></label>
+                    </li>
+                  {% else %}
+                    <li>
+                      <input type="radio" name="module_buttons" onchange='this.form.submit();' id="{{row[3]}}" value="{{row[3]}}"></input>
+                      <label for="{{row[3]}}"><p2>{{row[3]}}</p2></label>
+                    </li>
+                  {% endif %}
+                {% endfor %}
+              {% endfor %}
+              <p3><b>{{ course_name }}</p3></b>
+            {% endif %}
+          </form>
+        </ul>
+      </div>
+    </div>
+  </body>
+</html>

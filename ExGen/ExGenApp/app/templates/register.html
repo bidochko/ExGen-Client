@@ -1,0 +1,39 @@
+{% block head %}
+<head>
+  <title>ExGen Register</title>
+  <link rel="shortcut icon" href="{{url_for("static", filename="favicon.png")}}" type="image/x-icon">
+  <link rel="stylesheet" type="text/css" href="{{url_for("static", filename="css/register.css")}}">
+  <meta charset="utf-8">
+</head>
+{% endblock %}
+{% block body %}
+<body>
+	<div class="reg" align="center">
+    <img src="{{url_for('static', filename='exgen.png')}}"/>
+		{% from "_formmacro.html" import render_field %}
+		<form action="/register/" autocomplete="off" method="POST">
+			<dl>
+        {{render_field(form.name, placeholder="Full Name", onfocus="this.placeholder = ''", onblur="this.placeholder = 'Full Name'")}}
+        {{render_field(form.username, placeholder="Email", onfocus="this.placeholder = ''", onblur="this.placeholder = 'Email'")}}
+        {{render_field(form.studentid, placeholder="Student id", onfocus="this.placeholder = ''", onblur="this.placeholder = 'Student id'")}}
+        {{render_field(form.password, placeholder="Password", onfocus="this.placeholder = ''", onblur="this.placeholder = 'Password'")}}
+        {{render_field(form.confirm, placeholder="Re-enter password", onfocus="this.placeholder = ''", onblur="this.placeholder = 'Re-enter password'")}}
+        <p2>Use 8 or more characters with a mix of letters, numbers & symbols</p2>
+        <br>
+        <p2><i>By ticking this box you agree to the use of cookies, or something</i></p2>
+        {{render_field(form.accept_tos)}}
+      </dl>
+			<input type=submit value=Register>
+      {% with messages = get_flashed_messages() %}
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert alert-info alert-dismissible" role="alert">
+              <p3>{{message}}</p3>
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+		</form>
+	</div>
+</body>
+{% endblock %}

@@ -1,0 +1,68 @@
+<html>
+  <head>
+    <title>Home</title>
+    <link rel="shortcut icon" href="{{url_for("static", filename="favicon.png")}}" type="image/x-icon">
+    <link rel="stylesheet" type="text/css" href="{{url_for("static", filename="css/courserep/home.css")}}">
+    <meta charset="utf-8">
+  </head>
+  <body>
+    <div id="exgen">
+      <div class="barbluetop"></div>
+      <img src="{{url_for("static", filename="exgen_plain.png")}}"></img>
+      <div class="barbluebottom"></div>
+    </div>
+    <div class='menu'>
+      <div id='home'><a href="/home"><button class="menucurrent"><span><p>Home</p></span></button></a></div>
+      <div id='exams'><a href="/exams"><button class="menubutton"><span><p>Exams</p></span></button></a></div>
+      <div id='results'><a href="/results"><button class="menubutton"><span><p>Results</p></span></button></a></div>
+      <div id='course'><a href="/course-results"><button class="menubutton"><span><p>Course Results</p></span></button></a></div>
+      <div id='settings'><a href="/settings"><button class="menubutton"><span><p>Settings</p></span></button></a></div>
+    </div>
+    <div class='logout'><a href="/logout"><button class="logoutbutton"><span><p>Logout</p></span></button></a></div>
+    <div class="username">{{ session.username }}</div>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        {% for message in messages %}
+          <div class="flashed">
+            <div class="alert alert-info alert-dismissible" role="alert">
+              <p>{{message}}</p>
+            </div>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <div class="main" align="center">
+      <div class="quote">
+        <p2><i>Exgen is a tool for procedurally generating Computer Science <br>& Mathematics exam papers.</i></p2>
+      </div>
+      <div class="registered">
+        <p2><b>Registered Modules</b></p2>
+        <div class="table-registered">
+          <table class="table" id="modules">
+            <thead>
+              <col width="110px" />
+              <col width="340px" />
+              <tr>
+                <th scope="col"><p2><b>Course code</b></p2></th>
+                <th scope="col"><p2><b>Course name</b></p2></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for module in modules %}
+                {% for row in module %}
+                  <tr id={{ row[0] }}>
+                    <th scope="row"><p2>{{ row[3] }}</p2></th>
+                    <td><p2>{{ row[1] }}</p2></td>
+                  </tr>
+                {% endfor %}
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <a href="/modules/"><button class="addmodules">Add module</button></a>
+      </div>
+    </div>
+
+  </body>
+</html>

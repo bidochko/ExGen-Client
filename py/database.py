@@ -223,6 +223,11 @@ def get_modules_list_given_student_id(student_id):
         if inlist:
             student_modules_list.extend([module])
     return student_modules_list
+  
+  
+ def get_exam_list_given_module_id(module_id):
+    exams = db_session.query(Exam).filter(Exam.ModuleID == module_id).all()
+    return exams
 
 
 # Delete Functions

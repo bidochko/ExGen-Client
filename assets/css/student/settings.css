@@ -23,7 +23,7 @@ p2 {
   font-style: normal;
   font-weight: normal;
   font-size: 18px;
-  text-align: center;
+  text-align: left;
 }
 .menu {
   position: relative;
@@ -32,10 +32,10 @@ p2 {
   margin-right: auto;
   border: none;
   top: 15px;
-  width: 435px;
+  width: 510px;
   height: 30px;
   display: flex;
-  justify-content: space-around;
+  justify-content: stretch;
 }
 .menucurrent {
   background-color: #00A8A5;
@@ -142,54 +142,32 @@ img {
   margin-right: auto;
   width: 1000px;
 }
-.quote {
-  position: relative;
-  top: 70px;
-  height: 195px;
+.spacer {
+		margin-top: 50px;
 }
-.registered {
+.reset-password {
   position: relative;
   text-align: left;
-  height: auto;
 }
-.registered2 {
+.delete-account {
   position: relative;
-  top: 50px;
   text-align: left;
-  height: auto;
 }
-.available {
+.verification {
   position: relative;
-  top: 100px;
   text-align: left;
-  height: auto;
 }
-.table-responsive {
-  position: relative;
-  left:50%;
-  top: 20px;
-  margin-left: -200px;
-}
-th {
-  height:24px;
-}
-td {
+.segment-name {
+  width: 180px;
   text-align: center;
 }
-th {
-   text-align: center;
-}
-.addmodules {
+.message {
   position: relative;
-  top: 35px;
-  float: left;
-  left: 15px;
-}
-.table-responsive {
-  position: relative;
-  float: center;
-  width: 1000px;
-  left: 45%;
+  margin: 0px -300px;
+  left: 50%;
+  top: 20px;
+  width: 600px;
+  text-align: center;
 }
 button {
   position: absolute;
@@ -207,29 +185,56 @@ button {
   text-align: center;
   vertical-align: middle;
 }
-.opt-button {
+.reset-button {
   position: relative;
-  left: 10px;
+  left: 50%;
+  width: 170px;
+  margin: 0px -85px;
+  top: 30px;
   font-family: 'Ubuntu';
-  width: 70px;
-  padding: 3px 0px;
   font-style: normal;
   font-weight: normal;
   font-size: 16px;
   line-height: normal;
   text-align: center;
 }
-form[class=opt] {
-  height:0px;
+.delete-button {
+  position: relative;
+  left: 50%;
+  width: 165px;
+  margin: 0px -82.5px;
+  top: 30px;
+  font-family: 'Ubuntu';
+  font-style: normal;
+  font-weight: normal;
+  font-size: 16px;
+  line-height: normal;
+  text-align: center;
+}
+.request-button {
+  position: relative;
+  left: 50%;
+  width: 110px;
+  margin: 0px -55px;
+  top: 30px;
+  font-family: 'Ubuntu';
+  font-style: normal;
+  font-weight: normal;
+  font-size: 16px;
+  line-height: normal;
+  text-align: center;
 }
 input[type=text] {
+  position: relative;
   background-color: transparent;
+  height: 0px;
+  width: 0px;
+  left:-9999px;
   border: none;
-  width: 100px;
   font-family: 'Ubuntu';
   font-style: normal;
   font-weight: normal;
   font-size: 18px;
   line-height: normal;
-  text-align: center;
+  text-align: left;
 }

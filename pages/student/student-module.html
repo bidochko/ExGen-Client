@@ -45,7 +45,7 @@
               </tr>
             </thead>
             <tbody>
-              {% for module in modules_reg %}
+              {% for module in modules_registerd %}
                 <tr id={{ module.ModuleCode }}>
                   <form id="opt-out" name="opt-out" class="opt" action="/modules/" method="POST">
                     <th scope="row"><input id="opt_out_course_code" name="opt_out_course_code" type="text" value="{{ module.ModuleCode }}" readonly="readonly"></input></th>
@@ -72,11 +72,11 @@
             </thead>
             <div class="scrollable">
               <tbody>
-                {% for module in modules_available %}
-                  <tr id={{ module.ModuleCode }}>
+                {% for row in modules_available %}
+                  <tr id={{ row.ModuleCode }}>
                     <form id="opt-in" name="opt-in" class="opt" action="/modules/" method="POST">
-                      <th scope="row"><input id="opt_in_course_code" name="opt_in_course_code" type="text" value="{{ module.ModuleCode }}" readonly="readonly"></input></th>
-                      <td><p2>{{ module.ModuleName }}</p2></td>
+                      <th scope="row"><input id="opt_in_course_code" name="opt_in_course_code" type="text" value="{{ row.ModuleCode }}" readonly="readonly"></input></th>
+                      <td><p2>{{ row.ModuleName }}</p2></td>
                       <td><p2><button type="submit" class="opt-button">Opt-in</button></p2></td>
                     </form>
                   </tr>

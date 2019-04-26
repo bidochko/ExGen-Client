@@ -19,7 +19,7 @@ class User(Base):
     Salt = Column(String(128), nullable=False)
     Professor = relationship("Professor", uselist=False)
     Student = relationship("Student", uselist=False)
-    Answered = relationship("Answered")
+    AnsweredQuestion_List = relationship("AnsweredQuestion")
 
 
 class Professor(Base):
@@ -29,9 +29,8 @@ class Professor(Base):
     ProfessorInfo = Column(String(128))
 
     UserID = Column(ForeignKey('User.UserID'), primary_key=False, nullable=False, index=True)
-    User = relationship('User')
-    ProfessorModule = relationship('ProfessorModule')
-
+    User = relationship('User', uselist=False)
+    ProfessorModule_List = relationship('ProfessorModule')
 
 
 class Student(Base):
@@ -40,8 +39,8 @@ class Student(Base):
     isCourseRep = Column(Boolean, nullable=False)
 
     UserID = Column(ForeignKey('User.UserID'), primary_key=False, nullable=False, index=True)
-    User = relationship('User')
-    StudentModule = relationship('StudentModule')
+    User = relationship('User', uselist=False)
+    StudentModule_List = relationship('StudentModule')
 
 
 class CourseModule(Base):
@@ -49,10 +48,10 @@ class CourseModule(Base):
     ModuleID = Column(Integer, autoincrement=True, primary_key=True, unique=True, nullable=False)
     ModuleName = Column(String(128), nullable=False, unique=True)
     ModuleDescription = Column(String(128))
-    ModuleCode = Column(String(128), nullable=False)
-    Exam = relationship('Exam')
-    StudentModule = relationship('StudentModule')
-    ProfessorModule = relationship('ProfessorModule')
+    ModuleCode = Column(String(10), unique=True, nullable=False)
+    Exams = relationship('Exam')
+    StudentModule_List = relationship('StudentModule')
+    ProfessorModule_List = relationship('ProfessorModule')
 
 
 class Exam(Base):
@@ -64,14 +63,18 @@ class Exam(Base):
 
     ModuleID = Column(ForeignKey('CourseModule.ModuleID'), primary_key=False, nullable=False, index=True)
     CourseModule = relationship('CourseModule')
+    Questions = relationship('QuestionTemplate', secondary='Exam_Question')
 
 
-class Question(Base):
-    __tablename__ = "Question"
+class QuestionTemplate(Base):
+    __tablename__ = "QuestionTemplate"
     QuestionTemplateID = Column(Integer, autoincrement=True, primary_key=True, unique=True, nullable=False)
     LaTeX = Column(String(128), nullable=False)
     SolutionCode = Column(String(128), nullable=False)
     Enabled = Column(Boolean, nullable=False)
+
+    Exams = relationship('Exam', secondary='Exam_Question')
+    Question = relationship("Question")
 
 
 class Variable(Base):
@@ -80,14 +83,29 @@ class Variable(Base):
     VariableName = Column(String(32), nullable=False)
     VariableValue = Column(Integer, nullable=False)
 
+    QuestionID = Column(ForeignKey('Question.QuestionID'), primary_key=False, nullable=False, index=True)
+    Question = relationship("Question")
 
-class Answered(Base):
-    __tablename__ = "Answered"
+
+
+class Question(Base):
+    __tablename__ = "Question"
     QuestionID = Column(Integer, autoincrement=True, primary_key=True, unique=True, nullable=False)
+
+    QuestionTemplateID = Column(ForeignKey('QuestionTemplate.QuestionTemplateID'), primary_key=False, nullable=False, index=True)
+    QuestionTemplate = relationship("QuestionTemplate")
+    Variable = relationship("Variable")
+    AnsweredQuestion = relationship("AnsweredQuestion")
+
+
+class AnsweredQuestion(Base):
+    __tablename__ = "AnsweredQuestion"
     Correct = Column(Boolean, nullable=False)
 
-    UserID = Column(ForeignKey('User.UserID'), primary_key=False, nullable=False, index=True)
+    UserID = Column(ForeignKey('User.UserID'), primary_key=True, nullable=False, index=True)
     User = relationship("User")
+    QuestionID = Column(ForeignKey('Question.QuestionID'), primary_key=True, nullable=False, index=True)
+    Question = relationship("Question")
 
 
 class StudentModule(Base):
@@ -117,16 +135,8 @@ class ProfessorModule(Base):
 t_Exam_Question = Table(
     'Exam_Question', metadata,
     Column('ExamID', ForeignKey('Exam.ExamID'), primary_key=True, nullable=False, index=True),
-    Column('QuestionTemplateID', ForeignKey('Question.QuestionTemplateID'), primary_key=True, nullable=False,
+    Column('QuestionTemplateID', ForeignKey('QuestionTemplate.QuestionTemplateID'), primary_key=True, nullable=False,
            index=True)
-)
-
-t_Variable_Question = Table(
-    'Variable_Question', metadata,
-    Column('VariableID', ForeignKey('Variable.VariableID'), primary_key=True, nullable=False, index=True),
-    Column('QuestionTemplateID', ForeignKey('Question.QuestionTemplateID'), primary_key=True, nullable=False,
-           index=True),
-    Column('QuestionID', ForeignKey('Answered.QuestionID'), primary_key=True, nullable=False, index=True)
 )
 
 metadata.create_all(bind=engine)

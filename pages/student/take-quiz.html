@@ -1,0 +1,19 @@
+<form name="questions" class="questions" action="/quiz/" method="POST">
+    <li>
+      <input type="radio" name="question_option" id="question_option" value="{{ question.answer1 }}"></input>
+      <label for="{{ question.answer1 }}">{{ question.answer1 }}</label>
+    </li>
+    <li>
+      <input type="radio" name="question_option" id="question_option" value="{{ question.answer2 }}"></input>
+      <label for="{{ question.answer2 }}">{{ question.answer1 }}</label>
+    </li>
+    <li>
+      <input type="radio" name="question_option" id="question_option" value="{{ question.answer3 }}"></input>
+      <label for="{{ question.answer3 }}">{{ question.answer1 }}</label>
+    </li>
+    <li>
+      <input type="radio" name="question_option" id="question_option" value="{{ question.answer4 }}"></input>
+      <label for="{{ question.answer4 }}">{{ question.answer1 }}</label>
+    </li>
+    <button type="submit">Delete</button>
+</form>

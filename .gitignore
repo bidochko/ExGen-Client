@@ -67,3 +67,4 @@ fabric.properties
 
 #Config file
 py/config.py
+secret.txt

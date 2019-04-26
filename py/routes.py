@@ -389,3 +389,13 @@ def admin():
         return render_template("admin/admin-admin.html")
     else:
         return redirect(url_for('home'))
+    return render_template("courserep/courserep-course.html")
+
+@application.route("/quiz/", methods=['GET', 'POST'])
+@login_required
+def quiz():
+    form = ModuleFormProfessor(request.form)
+    if request.method == "POST" and form.validate():
+        if 'course_code' in request.form: #Deleting a module
+module_code = form.course_code.data
+

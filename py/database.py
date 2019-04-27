@@ -228,6 +228,16 @@ def get_modules_list_given_student_id(student_id):
  def get_exam_list_given_module_id(module_id):
     exams = db_session.query(Exam).filter(Exam.ModuleID == module_id).all()
     return exams
+  
+  
+ def get_all_exams_given_student_id(student_id):
+    exams_all = []
+    modules = get_modules_list_given_student_id(student_id)
+    for module in modules:
+        module_exams = get_exam_list_given_module_id(module.ModuleID)
+        if module_exams != []:
+            exams_all.extend([module_exams])
+    return exams_all
 
 
 # Delete Functions

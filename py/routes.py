@@ -306,7 +306,8 @@ def exams():
 @login_required
 def results():
     if(session['usertype'] == "student"): #student results
-        return render_template("student/student-results.html")
+        exams_all = database.get_all_exams_given_student_id(session['studentid'])
+        return render_template("student/student-results.html", exams_all=exams_all)
     elif(session['usertype'] == "courserep"): #Course Rep results
         return render_template("courserep/courserep-results.html")
     elif(session['usertype'] == "admin"): #Admin results

@@ -23,7 +23,15 @@ p2 {
   font-style: normal;
   font-weight: normal;
   font-size: 18px;
-  text-align: left;
+  text-align: center;
+}
+p3 {
+  font-family: 'Ubuntu';
+  font-style: normal;
+  font-weight: normal;
+  font-size: 18px;
+  float: center;
+  color: #00A8A5;
 }
 .menu {
   position: relative;
@@ -142,6 +150,68 @@ img {
   margin-right: auto;
   width: 1000px;
 }
-.course {
+.registered {
+  position: relative;
+  top: 40px;
+  height: 300px;
+  text-align: left;
+  height: auto;
+  float: left;
+}
+.table-exams {
+  position: relative;
+  top: 20px;
+  left: 50%;
+  margin: 0px -185px;
+  float: center;
+  text-align: center;
+  width: 1000px;
+}
+th {
+  height:24px;
+}
+td {
+  text-align: center;
+}
+th {
+   text-align: center;
+}
+button {
+  position: absolute;
+  position: relative;
+  background-color: #00A8A5;
+  border: none;
+  border-radius: 5px 5px 5px 5px;
+  color: black;
+  padding: 3px 16px;
+  font-family: 'Ubuntu';
+  font-style: normal;
+  font-weight: normal;
+  font-size: 20px;
+  line-height: normal;
+  text-align: center;
+  vertical-align: middle;
+}
+.report-button {
+  position: relative;
+  left: 10px;
+  font-family: 'Ubuntu';
   width: 135px;
+  padding: 3px 0px;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 16px;
+  line-height: normal;
+  text-align: center;
+}
+input[type=text] {
+  background-color: transparent;
+  border: none;
+  width: 100px;
+  font-family: 'Ubuntu';
+  font-style: normal;
+  font-weight: normal;
+  font-size: 18px;
+  line-height: normal;
+  text-align: center;
 }

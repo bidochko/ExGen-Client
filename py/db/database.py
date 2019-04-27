@@ -209,6 +209,14 @@ def get_available_modules_given_student_id(student_id):
             available_modules.extend([module])
     return available_modules
 
+def get_all_exams_given_student_id(student_id):
+    exams_all = []
+    modules = get_modules_list_given_student_id(student_id)
+    for module in modules:
+        module_exams = get_exam_list_given_module_id(module.ModuleID)
+        if module_exams != []:
+            exams_all.extend([module_exams])
+    return exams_all
 
 def get_questions_given_exam_id(exam_id):
     exam = db_session.query(Exam).filter(Exam.ExamID == exam_id).first()

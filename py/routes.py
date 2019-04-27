@@ -71,14 +71,15 @@ def index():
             email = user.UserName
             hash = user.Hash
             salt = user.Salt
-            #NEED TO FINISH USERTYPE
-            usertype = "student"
-            ########################
             formattedhash = "$5$rounds=555000$" + salt + "$" + hash #formatted password for .verify function
             if sha256_crypt.verify(request.form['password'], formattedhash):
                 session['logged_in'] = True #set session as logged in
                 session['username'] = email #set username as email
                 session['userid'] = userid #userid
+                usertype = "student"
+                student = database.get_student_given_user_id(userid)
+                if student.isCourseRep == 1:
+                    usertype = "courserep"
                 session['usertype'] = usertype #user type i.e. student
                 if(usertype == "professor"):
                     professor = database.get_professor_given_user_id(userid)
@@ -262,7 +263,9 @@ def create_module():
 @login_required
 def exams():
     conn, trans = connect()
-    if(session['usertype'] == "student"): #Student Exams
+    if(session['usertype'] == "professor"): #Professor Exams
+        return render_template("professor/professor-exams.html")
+    else: #Student Exams
         module_list = database.get_modules_list_given_student_id(session['studentid'])
         course_code = "NULL" #temp code
         empty = False
@@ -275,7 +278,7 @@ def exams():
                 if exams == []:
                     empty = True
         if(course_code == "NULL"): #if button wasn't pressed, set course_code to first registered module
-            try: #If user has no modules registered it erros, so set course_code to NULL if errors
+            try: 
                 first_module = conn.execute("SELECT * FROM StudentModule WHERE StudentID=%s LIMIT 1", (session['studentid'])) #get first registered module
                 for row in first_module:
                     first_moduleid = row[2] #get module id
@@ -288,19 +291,14 @@ def exams():
                 if exams == []:
                     empty = True
             except:
-                course_code = "NULL" #no registered modules, handled in the html
-                if exams == []:
-                    empty = True
-        return render_template("student/student-exams.html", modules=module_list, course_code=course_code, module_details=module_details, exams=exams, empty=empty)
-    elif(session['usertype'] == "courserep"): #Course Exams
-        return render_template("courserep/courserep-exams.html")
-    elif(session['usertype'] == "professor"): #Professor Exams
-        return render_template("professor/professor-exams.html")
-    elif(session['usertype'] == "admin"): #Admin Exams
-        return render_template("admin/admin-exams.html")
-    else: #temp redirect for other user
-        return redirect(url_for('home'))
-
+                module_details = None
+                exams = None
+                empty = True
+         
+        if(session['usertype'] == "student"):
+            return render_template("student/student-exams.html", modules=module_list, course_code=course_code, module_details=module_details, exams=exams, empty=empty)
+        elif(session['usertype'] == "courserep"):
+            return render_template("courserep/courserep-exams.html", modules=module_list, course_code=course_code, module_details=module_details, exams=exams, empty=empty)
 #Student Results
 @application.route("/results/", methods=['GET', 'POST'])
 @login_required

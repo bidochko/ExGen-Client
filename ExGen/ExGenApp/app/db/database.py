@@ -152,14 +152,14 @@ def get_module_id_given_module_code(module_code):
     return None
 
 
-def get_modules_given_student_id(student_id):
+def get_module_ids_given_student_id(student_id):
     module = db_session.query(StudentModule).filter(StudentModule.StudentID == student_id).all()
     return module
 
     # Returns a list of ModuleIDs
 
 
-def get_module_id_given_professor_id(professor_id):
+def get_module_ids_given_professor_id(professor_id):
     module = db_session.query(ProfessorModule).filter(ProfessorModule.ProfessorID == professor_id).all()
     return module
 
@@ -182,8 +182,9 @@ def get_full_module_list_given_student_id(student_id):
         return student.StudentModule_List
     return None
 
+
 def get_modules_list_given_student_id(student_id):
-    module_id_list = get_modules_given_student_id(student_id)
+    module_id_list = get_module_ids_given_student_id(student_id)
     modules_list = get_all_available_modules()
     student_modules_list = []
     for module in modules_list:
@@ -197,7 +198,7 @@ def get_modules_list_given_student_id(student_id):
 
 
 def get_available_modules_given_student_id(student_id):
-    module_id_list = get_modules_given_student_id(student_id)
+    module_id_list = get_module_ids_given_student_id(student_id)
     modules_list = get_all_available_modules()
     available_modules = []
     for module in modules_list:
@@ -222,6 +223,21 @@ def get_questions_given_exam_id(exam_id):
 def get_student_given_student_id(student_id):
     student = db_session.query(Student).filter(Student.StudentID == student_id).first()
     return student
+
+
+def get_exam_list_given_module_id(module_id):
+    exams = db_session.query(Exam).filter(Exam.ModuleID == module_id).all()
+    return exams
+
+
+def get_all_exams_given_student_id(student_id):
+    exams_all = []
+    modules = get_modules_list_given_student_id(student_id)
+    for module in modules:
+        module_exams = get_exam_list_given_module_id(module.ModuleID)
+        if module_exams != []:
+            exams_all.extend([module_exams])
+    return exams_all
 
 
 # Delete Functions
@@ -253,12 +269,32 @@ def delete_all_professors_from_module(module_id):
 def delete_module(module_id):
     delete_all_students_from_module(module_id)
     delete_all_professors_from_module(module_id)
-    db_session.query(CourseModule).filter(CourseModule.ModuleID == module_id).delete()
+    module = db_session.query(CourseModule).filter(CourseModule.ModuleID == module_id).first()
+    db_session.delete(module)
     db_session.commit()
 
 
 def delete_exam(exam_id):
-    db_session.query(Exam).filter(Exam.ExamID == exam_id).delete()
+    exam = db_session.query(Exam).filter(Exam.ExamID == exam_id).first()
+    db_session.delete(exam)
+    db_session.commit()
+
+
+def delete_user(user_id):
+    user = db_session.query(Exam).filter(Exam.ExamID == user_id).first()
+    db_session.delete(user)
+    db_session.commit()
+
+
+def delete_student(student_id):
+    student = db_session.query(Student).filter(Student.StudentID == student_id).first()
+    db_session.delete(student)
+    db_session.commit()
+
+
+def delete_professor(professor_id):
+    professor = db_session.query(Professor).filter(Professor.ProfessorID == professor_id).first()
+    db_session.delete(professor)
     db_session.commit()
 
 
@@ -288,3 +324,5 @@ def check_user_completed_question(question_id, student_id):
     else:
         return False
 
+
+# def upgrade_student_to_professor(student_id, professor_name, professor_info, professor_id):

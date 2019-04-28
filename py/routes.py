@@ -62,7 +62,7 @@ def logout():
 def index():
     error = "" #temp definition
     if request.method == "POST": #user presses "login"
-        user = database.get_user_from_user_name(thwart(request.form['username']))
+        user = database.get_user_given_user_name(thwart(request.form['username']))
         if(user == None):
             error = "Incorrect credentials"
             return render_template("login.html", error = error) #refresh with error
@@ -71,20 +71,21 @@ def index():
             email = user.UserName
             hash = user.Hash
             salt = user.Salt
-            #NEED TO FINISH USERTYPE
-            usertype = "student"
-            ########################
             formattedhash = "$5$rounds=555000$" + salt + "$" + hash #formatted password for .verify function
             if sha256_crypt.verify(request.form['password'], formattedhash):
                 session['logged_in'] = True #set session as logged in
                 session['username'] = email #set username as email
                 session['userid'] = userid #userid
+                usertype = "student"
+                student = database.get_student_given_user_id(userid)
+                if student.isCourseRep == 1:
+                    usertype = "courserep"
                 session['usertype'] = usertype #user type i.e. student
                 if(usertype == "professor"):
-                    professor = database.get_professor_from_user_id(userid)
+                    professor = database.get_professor_given_user_id(userid)
                     session['professorid'] = professor.ProfessorID
                 else:
-                    student = database.get_student_from_user_id(userid)
+                    student = database.get_student_given_user_id(userid)
                     session['studentid'] = student.StudentID
                 return redirect(url_for('home'))
             else:
@@ -113,7 +114,7 @@ def register():
         password = sha256_crypt.encrypt((str(form.password.data)), salt=randomSalt, rounds=555000)
         password = password.split("$")[4]
 
-        user = database.get_user_from_user_name(thwart(username))
+        user = database.get_user_given_user_name(thwart(username))
         if(user != None):
             flash("Email is already registered")
             return render_template('register.html', form=form)
@@ -138,10 +139,10 @@ def handle_404(e):
 @login_required
 def home():
     if(session['usertype'] == "student"): #Student Home
-        module_list = database.get_full_module_list_from_student_id(session['studentid'])
+        module_list = database.get_modules_list_given_student_id(session['studentid'])
         return render_template("student/student-home.html", modules=module_list)
     elif(session['usertype'] == "courserep"): #Course Rep home
-        module_list = database.get_full_module_list_from_student_id(session['studentid'])
+        module_list = database.get_modules_list_given_student_id(session['studentid'])
         return render_template("courserep/courserep-home.html", modules=module_list)
     elif(session['usertype'] == "professor"): #Professor home
         #Slight difference with professors as we get the modules that they have created
@@ -150,7 +151,7 @@ def home():
         module_list = tuple(conn.execute("SELECT * FROM Module WHERE ModuleID = {}".format(x[1])) for x in moduleids)
         return render_template("professor/professor-home.html", modules=module_list)
     elif(session['usertype'] == "admin"): #Admin home
-        module_list = database.get_full_module_list_from_student_id(session['studentid'])
+        module_list = database.get_modules_list_given_student_id(session['studentid'])
         return render_template("admin/admin-home.html", modules=module_list)
     else: #temp redirect for other user
         return redirect(url_for('logout'))
@@ -170,6 +171,7 @@ class ModuleFormProfessor(Form):
 @application.route("/modules/", methods=['GET', 'POST'])
 @login_required
 def modules():
+    conn, trans = connect() #Connect to MySQL
     if(session['usertype'] == "professor"): #professor
         form = ModuleFormProfessor(request.form)
         if request.method == "POST" and form.validate():
@@ -182,32 +184,34 @@ def modules():
                 database.delete_all_students_from_module(module_id)
                 database.delete_all_professors_from_module(module_id)
     else: #every other user
-        
         form = ModuleFormStudent(request.form)               #Form for the opt-in/out buttons
-        if request.method == "POST" and form.validate():     #if button is pressed
+        if request.method == "POST":     #if button is pressed
             modules_all = database.get_all_available_modules()
             if 'opt_out_course_code' in request.form:        #Opt-out button was pressed
                 module_code = form.opt_out_course_code.data  #Get module button id
                 for row in modules_all:                #Getting module_id from COMPXXX
                     if row.ModuleCode == module_code:
-                        module_id = row.ModuleID
-                database.delete_one_student_from_module(session['studentid'], module_id)
+                        module_id_delete = row.ModuleID
+                database.delete_one_student_from_module(session['studentid'], module_id_delete)
             elif 'opt_in_course_code' in request.form:
                 module_code = form.opt_in_course_code.data #same as above but for opt-in
                 for row in modules_all:
                     if row.ModuleCode == module_code:
-                        module_id = row.ModuleID
-                database.add_student_to_module(session['studentid'], module_id, 0)
+                        module_id_add = row.ModuleID
+                database.add_student_to_module(session['studentid'], module_id_add, 0)
+
+
+
+
 
     #Get registered modules and available modules
     if(session['usertype'] == "student"):
-        modules_reg = database.get_full_module_list_from_student_id(session['studentid'])
-        modules_available = database.get_available_modules(session['studentid'])
-        return render_template("student/student-module.html", modules_reg=modules_reg, modules_available=modules_available)
+        modules_registerd = database.get_modules_list_given_student_id(session['studentid'])
+        modules_available = database.get_available_modules_given_student_id(session['studentid'])
+        return render_template("student/student-module.html", modules_registerd=modules_registerd, modules_available=modules_available)
     elif(session['usertype'] == "courserep"): #Course Rep home
-        moduleids = conn.execute("SELECT * FROM StudentModule WHERE StudentID = {}".format(session['studentid']))
-        modules_reg = tuple(conn.execute("SELECT * FROM Module WHERE ModuleID = {}".format(x[1])) for x in moduleids)
-        modules_available = conn.execute("SELECT * FROM Module")
+        modules_reg = database.get_full_module_list_from_student_id(session['studentid'])
+        modules_available = database.get_available_modules_student(session['studentid'])
         return render_template("courserep/courserep-module.html", modules_reg=modules_reg, modules_available=modules_available)
     elif(session['usertype'] == "professor"): #Professor home
         moduleids = conn.execute("SELECT * FROM ProfessorModule WHERE ProfessorID = {}".format(session['professorid']))
@@ -215,9 +219,8 @@ def modules():
         modules_available = conn.execute("SELECT * FROM Module")
         return render_template("professor/professor-module.html", modules_reg=modules_reg)
     elif(session['usertype'] == "admin"): #Admin home
-        moduleids = conn.execute("SELECT * FROM StudentModule WHERE StudentID = {}".format(session['studentid']))
-        modules_reg = tuple(conn.execute("SELECT * FROM Module WHERE ModuleID = {}".format(x[1])) for x in moduleids)
-        modules_available = conn.execute("SELECT * FROM Module")
+        modules_reg = database.get_full_module_list_from_student_id(session['studentid'])
+        modules_available = database.get_available_modules_student(session['studentid'])
         return render_template("admin/admin-module.html", modules_reg=modules_reg, modules_available=modules_available)
     else:
         return redirect(url_for('logout'))
@@ -260,41 +263,49 @@ def create_module():
 @login_required
 def exams():
     conn, trans = connect()
-    if(session['usertype'] == "student"): #Student Exams
-        moduleids = conn.execute("SELECT * FROM StudentModule WHERE StudentID = {}".format(session['studentid']))
-        module_list = tuple(conn.execute("SELECT * FROM Module WHERE ModuleID = {}".format(x[1])) for x in moduleids)
-
+    if(session['usertype'] == "professor"): #Professor Exams
+        return render_template("professor/professor-exams.html")
+    else: #Student Exams
+        module_list = database.get_modules_list_given_student_id(session['studentid'])
         course_code = "NULL" #temp code
+        empty = False
         if request.method == "POST": #on post
             if 'module_buttons' in request.form: #check if button was pressed
                 course_code = request.form.get("module_buttons") #get module_code from button
-
+                module_details_id = database.get_module_id_given_module_code(course_code)
+                module_details = database.get_module_given_module_id(module_details_id)
+                exams = database.get_exam_list_given_module_id(module_details_id)
+                if exams == []:
+                    empty = True
         if(course_code == "NULL"): #if button wasn't pressed, set course_code to first registered module
-            try: #If user has no modules registered it erros, so set course_code to NULL if errors
+            try: 
                 first_module = conn.execute("SELECT * FROM StudentModule WHERE StudentID=%s LIMIT 1", (session['studentid'])) #get first registered module
                 for row in first_module:
-                    first_moduleid = row[1] #get module id
-                module = conn.execute("SELECT ModuleCode FROM Module WHERE ModuleID=%s", (first_moduleid)) #get module information
+                    first_moduleid = row[2] #get module id
+                module = conn.execute("SELECT ModuleCode FROM CourseModule WHERE ModuleID=%s", (first_moduleid)) #get module information
                 for row in module:
                     course_code = row[0] #get module code i.e. COMP202
+                module_details_id = database.get_module_id_given_module_code(course_code)
+                module_details = database.get_module_given_module_id(module_details_id)
+                exams = database.get_exam_list_given_module_id(module_details_id)
+                if exams == []:
+                    empty = True
             except:
-                course_code = "NULL" #no registered modules, handled in the html
-        return render_template("student/student-exams.html", modules=module_list, course_code=course_code)
-    elif(session['usertype'] == "courserep"): #Course Exams
-        return render_template("courserep/courserep-exams.html")
-    elif(session['usertype'] == "professor"): #Professor Exams
-        return render_template("professor/professor-exams.html")
-    elif(session['usertype'] == "admin"): #Admin Exams
-        return render_template("admin/admin-exams.html")
-    else: #temp redirect for other user
-        return redirect(url_for('home'))
-
+                module_details = None
+                exams = None
+                empty = True
+         
+        if(session['usertype'] == "student"):
+            return render_template("student/student-exams.html", modules=module_list, course_code=course_code, module_details=module_details, exams=exams, empty=empty)
+        elif(session['usertype'] == "courserep"):
+            return render_template("courserep/courserep-exams.html", modules=module_list, course_code=course_code, module_details=module_details, exams=exams, empty=empty)
 #Student Results
 @application.route("/results/", methods=['GET', 'POST'])
 @login_required
 def results():
     if(session['usertype'] == "student"): #student results
-        return render_template("student/student-results.html")
+        exams_all = database.get_all_exams_given_student_id(session['studentid'])
+        return render_template("student/student-results.html", exams_all=exams_all)
     elif(session['usertype'] == "courserep"): #Course Rep results
         return render_template("courserep/courserep-results.html")
     elif(session['usertype'] == "admin"): #Admin results

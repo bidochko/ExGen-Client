@@ -8,11 +8,12 @@ from saltgen import createSalt
 
 #Flask Form
 from flask_wtf import FlaskForm
-from wtforms import Form, validators, TextField, PasswordField, BooleanField, SubmitField
+from wtforms import Form, validators, TextField, PasswordField, BooleanField, SubmitField, IntegerField
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo, Length
 
 #SQL Injection prevention
 from MySQLdb import escape_string as thwart
+from db import database
 from dbconnect import connect
 
 #Emailing
@@ -59,46 +60,40 @@ def logout():
 @application.route('/index', methods=['GET', 'POST'])
 @logout_required
 def index():
-    error = '' #temp definition
-    try:
-        conn, trans = connect() #Connect SQLAlchemy Engine to MySQL
-        if request.method == "POST": #user presses "login"
-            data = conn.execute("SELECT * from User where UserName = %s", thwart(request.form['username']))
-            for row in data:
-                userid = row[0]
-                email = row[1]
-                hash = row[2] # 3rd column is the hashed password
-                salt = row[3] # 4th column is the salt
-                usertype = row[4]
+    error = "" #temp definition
+    if request.method == "POST": #user presses "login"
+        user = database.get_user_given_user_name(thwart(request.form['username']))
+        if(user == None):
+            error = "Incorrect credentials"
+            return render_template("login.html", error = error) #refresh with error
+        else:
+            userid = user.UserID
+            email = user.UserName
+            hash = user.Hash
+            salt = user.Salt
             formattedhash = "$5$rounds=555000$" + salt + "$" + hash #formatted password for .verify function
-            if sha256_crypt.verify(request.form['password'], formattedhash): #successful login
-                #Session details
+            if sha256_crypt.verify(request.form['password'], formattedhash):
                 session['logged_in'] = True #set session as logged in
                 session['username'] = email #set username as email
                 session['userid'] = userid #userid
+                usertype = "student"
+                student = database.get_student_given_user_id(userid)
+                if student == None:
+                    usertype = "professor"
+                elif student.isCourseRep == 1:
+                    usertype = "courserep"
                 session['usertype'] = usertype #user type i.e. student
                 if(usertype == "professor"):
-                    data = conn.execute("SELECT * from Professor where UserID = %s", (userid))
-                    for row in data:
-                        professorid = row[0]
-                    session['professorid'] = professorid #professorid instead of studentid
+                    professor = database.get_professor_given_user_id(userid)
+                    session['professorid'] = professor.ProfessorID
                 else:
-                    data = conn.execute("SELECT * from Student where UserID = %s", (userid))
-                    for row in data:
-                        studentid = row[0]
-                    session['studentid'] = studentid #studentid
-                return redirect(url_for("home")) #redirect user to /home
+                    student = database.get_student_given_user_id(userid)
+                    session['studentid'] = student.StudentID
+                return redirect(url_for('home'))
             else:
                 error = "Incorrect credentials"
-        gc.collect()
-        conn.close() #close database connection
-        return render_template("login.html", error=error) #refresh with error
-    except Exception as e:
-        error = "Incorrect credentials"
-        return render_template("login.html", error = error) #refresh with error
-
-
-
+        return render_template("login.html", error=error)
+    return render_template("login.html", error = error) #refresh with error
 
 #Register Form
 class RegistrationForm(Form):
@@ -107,50 +102,28 @@ class RegistrationForm(Form):
     studentid = TextField("Email", [validators.Required(), validators.Length(min=9, max=9)])
     password = PasswordField("Password", [validators.Required(), validators.Length(min=8, max=128), validators.EqualTo('confirm', message='Passwords must match')])
     confirm = PasswordField('Re-enter password')
-    accept_tos = BooleanField('I accept giving away my soul', [validators.Required()])
+    accept_tos = BooleanField('I accept to the use of cookies', [validators.Required()])
 
 @application.route('/register/', methods=["GET","POST"])
 @logout_required
 def register():
-    try:
-        form = RegistrationForm(request.form)
+    form = RegistrationForm(request.form)
+    if request.method == "POST" and form.validate():
+        name = form.name.data
+        username = form.username.data
+        studentid = form.studentid.data
+        randomSalt = createSalt()
+        password = sha256_crypt.encrypt((str(form.password.data)), salt=randomSalt, rounds=555000)
+        password = password.split("$")[4]
 
-        if request.method == "POST" and form.validate():
-            name = form.name.data
-            username = form.username.data
-            studentid = form.studentid.data
-            randomSalt = createSalt()
-            password = sha256_crypt.encrypt((str(form.password.data)), salt=randomSalt, rounds=555000)
-            password = password.split("$")[4]
-
-            conn, trans = connect()
-            counter = 0
-            x = conn.execute("SELECT * from User where UserName = %s", thwart(username))
-            for row in x:
-                counter += 1
-            if counter > 0:
-                flash("Email is already registered")
-                return render_template('register.html', form=form)
-            else:
-                try:
-                    type = "student"
-                    conn.execute("INSERT INTO User (UserName, Hash, Salt, Type) VALUES (%s, %s, %s, %s)", (thwart(username), thwart(password), randomSalt, type))
-                    data = conn.execute("SELECT * from User where UserName = %s", (thwart(username)))
-                    for row in data:
-                        userid = row[0]
-                    conn.execute("INSERT INTO Student (StudentID, UserID) VALUES (%s, %s)", ((thwart(studentid)), userid))
-                    trans.commit()  # transaction is not committed yet
-                except:
-                    trans.rollback() # this rolls back the transaction unconditionally
-            conn.close()
-            gc.collect()
-            return redirect(url_for('index'))
-        return render_template("register.html", form=form)
-
-    except Exception as e:
-        return(str(e))
-
-
+        user = database.get_user_given_user_name(thwart(username))
+        if(user != None):
+            flash("Email is already registered")
+            return render_template('register.html', form=form)
+        else:
+            database.create_professor(thwart(username), thwart(password), randomSalt, name, "", thwart(studentid))
+        return redirect(url_for('index'))
+    return render_template("register.html", form=form)
 
 #Cookies
 @application.route("/cookies/", methods=['GET', 'POST'])
@@ -163,31 +136,22 @@ def handle_404(e):
     return redirect(url_for('index'))
 
 
-
 #Home
 @application.route("/home/", methods=['GET', 'POST'])
 @login_required
 def home():
     if(session['usertype'] == "student"): #Student Home
-        conn, trans = connect()
-        moduleids = conn.execute("SELECT * FROM StudentModule WHERE StudentID = {}".format(session['studentid']))
-        module_list = tuple(conn.execute("SELECT * FROM Module WHERE ModuleID = {}".format(x[1])) for x in moduleids)
+        module_list = database.get_modules_list_given_student_id(session['studentid'])
         return render_template("student/student-home.html", modules=module_list)
     elif(session['usertype'] == "courserep"): #Course Rep home
-        conn, trans = connect()
-        moduleids = conn.execute("SELECT * FROM StudentModule WHERE StudentID = {}".format(session['studentid']))
-        module_list = tuple(conn.execute("SELECT * FROM Module WHERE ModuleID = {}".format(x[1])) for x in moduleids)
+        module_list = database.get_modules_list_given_student_id(session['studentid'])
         return render_template("courserep/courserep-home.html", modules=module_list)
     elif(session['usertype'] == "professor"): #Professor home
         #Slight difference with professors as we get the modules that they have created
-        conn, trans = connect()
-        moduleids = conn.execute("SELECT * FROM ProfessorModule WHERE ProfessorID = {}".format(session['professorid']))
-        module_list = tuple(conn.execute("SELECT * FROM Module WHERE ModuleID = {}".format(x[1])) for x in moduleids)
-        return render_template("professor/professor-home.html", modules=module_list)
+        professor_modules = database.get_modules_list_given_professor_id(session['professorid'])
+        return render_template("professor/professor-home.html", modules=professor_modules)
     elif(session['usertype'] == "admin"): #Admin home
-        conn, trans = connect()
-        moduleids = conn.execute("SELECT * FROM StudentModule WHERE StudentID = {}".format(session['studentid']))
-        module_list = tuple(conn.execute("SELECT * FROM Module WHERE ModuleID = {}".format(x[1])) for x in moduleids)
+        module_list = database.get_modules_list_given_student_id(session['studentid'])
         return render_template("admin/admin-home.html", modules=module_list)
     else: #temp redirect for other user
         return redirect(url_for('logout'))
@@ -207,73 +171,61 @@ class ModuleFormProfessor(Form):
 @application.route("/modules/", methods=['GET', 'POST'])
 @login_required
 def modules():
-    conn, trans = connect() #Connect to MySQL
-    modules_available = conn.execute("SELECT * FROM Module") #Get all modules
-
+    module_code_post = "NULL"
     if(session['usertype'] == "professor"): #professor
         form = ModuleFormProfessor(request.form)
-        if request.method == "POST" and form.validate():
+        if request.method == "POST":
             if 'course_code' in request.form: #Deleting a module
                 module_code = form.course_code.data
-                for row in modules_available:                #Getting module_id from COMPXXX
-                    if row[3] == module_code:
-                        module_id = row[0]
-                conn.execute("DELETE FROM Module WHERE ModuleID=%s", module_id) #Delete the module from module table
-                conn.execute("DELETE FROM StudentModule WHERE ModuleID=%s", module_id) #Delete every student module entry
-                conn.execute("DELETE FROM ProfessorModule WHERE ModuleID=%s", module_id) #Delete the professor module entry
-                trans.commit() #commit transaction
+                modules_all = database.get_all_available_modules()
+                for module in modules_all:                #Getting module_id from COMPXXX
+                    if module.ModuleCode == module_code:
+                        module_id = module.ModuleID
+                database.delete_module(module_id)
+                database.delete_all_students_from_module(module_id)
+                database.delete_all_professors_from_module(module_id)
+            if 'module_buttons' in request.form: #check if button was pressed
+                module_code_post = request.form.get("module_buttons")
     else: #every other user
         form = ModuleFormStudent(request.form)               #Form for the opt-in/out buttons
-        if request.method == "POST" and form.validate():     #if button is pressed
+        if request.method == "POST":     #if button is pressed
+            modules_all = database.get_all_available_modules()
             if 'opt_out_course_code' in request.form:        #Opt-out button was pressed
                 module_code = form.opt_out_course_code.data  #Get module button id
-                for row in modules_available:                #Getting module_id from COMPXXX
-                    if row[3] == module_code:
-                        module_id = row[0]
-                conn.execute("DELETE FROM StudentModule WHERE StudentID=%s AND ModuleID=%s", (session['studentid'], module_id)) #Delete query from StudentModule table
-                trans.commit() #Commit transaction
+                for row in modules_all:                #Getting module_id from COMPXXX
+                    if row.ModuleCode == module_code:
+                        module_id_delete = row.ModuleID
+                database.delete_one_student_from_module(session['studentid'], module_id_delete)
             elif 'opt_in_course_code' in request.form:
                 module_code = form.opt_in_course_code.data #same as above but for opt-in
-                meme = "test"
-                for row in modules_available:
-                    if row[3] == module_code:
-                        module_id = row[0]
-                #here we need to check if the student is already optted into the chosen module
-                #What would be better here would be if we only display true available modules
-                student_modules = conn.execute("SELECT * FROM StudentModule WHERE StudentID = {}".format(session['studentid'])) #get students registered modules
-                already_added = False #boolean for check
-                for module in student_modules: #loop through all and check if module_id is in this list
-                    if module[1] == module_id:
-                        already_added = True
-                if already_added == False:
-                    #If module is not in the list, add it to the list
-                    conn.execute("INSERT INTO StudentModule VALUES (%s, %s)", (session['studentid'], module_id))
-                    trans.commit()
-                else:
-                    #Flash an error message otherwise
-                    flash("Module already added")
-
+                for row in modules_all:
+                    if row.ModuleCode == module_code:
+                        module_id_add = row.ModuleID
+                database.add_student_to_module(session['studentid'], module_id_add, 0)
 
     #Get registered modules and available modules
     if(session['usertype'] == "student"):
-        moduleids = conn.execute("SELECT * FROM StudentModule WHERE StudentID = {}".format(session['studentid']))
-        modules_reg = tuple(conn.execute("SELECT * FROM Module WHERE ModuleID = {}".format(x[1])) for x in moduleids)
-        modules_available = conn.execute("SELECT * FROM Module")
-        return render_template("student/student-module.html", modules_reg=modules_reg, modules_available=modules_available)
+        modules_registerd = database.get_modules_list_given_student_id(session['studentid'])
+        modules_available = database.get_available_modules_given_student_id(session['studentid'])
+        return render_template("student/student-module.html", modules_registerd=modules_registerd, modules_available=modules_available)
     elif(session['usertype'] == "courserep"): #Course Rep home
-        moduleids = conn.execute("SELECT * FROM StudentModule WHERE StudentID = {}".format(session['studentid']))
-        modules_reg = tuple(conn.execute("SELECT * FROM Module WHERE ModuleID = {}".format(x[1])) for x in moduleids)
-        modules_available = conn.execute("SELECT * FROM Module")
+        modules_reg = database.get_full_module_list_from_student_id(session['studentid'])
+        modules_available = database.get_available_modules_student(session['studentid'])
         return render_template("courserep/courserep-module.html", modules_reg=modules_reg, modules_available=modules_available)
     elif(session['usertype'] == "professor"): #Professor home
-        moduleids = conn.execute("SELECT * FROM ProfessorModule WHERE ProfessorID = {}".format(session['professorid']))
-        modules_reg = tuple(conn.execute("SELECT * FROM Module WHERE ModuleID = {}".format(x[1])) for x in moduleids)
-        modules_available = conn.execute("SELECT * FROM Module")
-        return render_template("professor/professor-module.html", modules_reg=modules_reg)
+        modules_reg = database.get_modules_list_given_professor_id(session['professorid'])
+        if module_code_post == "NULL":
+            if modules_reg != []:
+                module_code_post = modules_reg[0].ModuleCode
+        professors = database.get_user_from_professors(module_code_post)
+        professors_list = []
+        for professor in professors:
+            if professor.UserID != session['userid']:
+                professors_list.extend([professor])
+        return render_template("professor/professor-module.html", modules_reg=modules_reg, module_code_post=module_code_post, professors_list=professors_list)
     elif(session['usertype'] == "admin"): #Admin home
-        moduleids = conn.execute("SELECT * FROM StudentModule WHERE StudentID = {}".format(session['studentid']))
-        modules_reg = tuple(conn.execute("SELECT * FROM Module WHERE ModuleID = {}".format(x[1])) for x in moduleids)
-        modules_available = conn.execute("SELECT * FROM Module")
+        modules_reg = database.get_full_module_list_from_student_id(session['studentid'])
+        modules_available = database.get_available_modules_student(session['studentid'])
         return render_template("admin/admin-module.html", modules_reg=modules_reg, modules_available=modules_available)
     else:
         return redirect(url_for('logout'))
@@ -295,15 +247,7 @@ def create_module():
             course_code = form.module_code.data
             course_name = form.module_name.data
             course_desc = form.module_desc.data
-            #Get last id, this wont be needed when the database is working
-            module = conn.execute("SELECT * FROM Module ORDER BY ModuleID DESC LIMIT 1")
-            for row in module:
-                current_module_key = row[0]
-            current_module_key += 1 #Add one to the biggest id
-            #Insert data into Module and ProfessorModule
-            conn.execute("INSERT INTO Module (ModuleID, ModuleName, ModuleDescription, ModuleCode) VALUES (%s, %s, %s, %s)", (current_module_key, thwart(course_name), thwart(course_desc),thwart(course_code)))
-            conn.execute("INSERT INTO ProfessorModule (ProfessorID, ModuleID, HeadProfessor) VALUES (%s, %s, %s)", (session['professorid'], current_module_key, 1))
-            trans.commit() #commit tables
+            database.create_module_given_head_professor(session['professorid'], course_name, course_desc, course_code)
             return redirect(url_for('modules')) #redirect to modules
         return render_template("professor/professor-create-module.html", form=form) #load create module page
     else:
@@ -315,23 +259,124 @@ def create_module():
 @application.route("/exams/", methods=['GET', 'POST'])
 @login_required
 def exams():
-    if(session['usertype'] == "student"): #Student Exams
-        return render_template("student/student-exams.html")
-    elif(session['usertype'] == "courserep"): #Course Exams
-        return render_template("courserep/courserep-exams.html")
-    elif(session['usertype'] == "professor"): #Professor Exams
-        return render_template("professor/professor-exams.html")
-    elif(session['usertype'] == "admin"): #Admin Exams
-        return render_template("admin/admin-exams.html")
-    else: #temp redirect for other user
+    conn, trans = connect()
+    if(session['usertype'] == "professor"): #Professor Exams
+        professor_modules = database.get_modules_list_given_professor_id(session['professorid'])
+        course_code = "NULL"
+        exam_choice = "NULL"
+        if request.method == "POST":
+            if 'module_buttons' in request.form:
+                course_code = request.form.get("module_buttons")
+            if 'exam_buttons' in request.form:
+                exam_choice = request.form.get("exam_buttons")
+        if course_code == "NULL":
+            if professor_modules != []:
+                course_code = professor_modules[0].ModuleCode
+        exams = database.get_exam_as_list(course_code)
+        index_exam = ""
+        if exams != []:
+            index_exam = exams[0]
+        if exam_choice != "NULL":
+            for exam in exams:
+                if exam.Title == exam_choice:
+                    index_exam = exam
+        session['exam_course_code'] = course_code
+        return render_template("professor/professor-exams.html", modules=professor_modules, course_code=course_code, exams=exams, index_exam=index_exam)
+    else: #Student Exams
+        module_list = database.get_modules_list_given_student_id(session['studentid'])
+        course_code = "NULL" #temp code
+        empty = False
+        if request.method == "POST": #on post
+            if 'module_buttons' in request.form: #check if button was pressed
+                course_code = request.form.get("module_buttons") #get module_code from button
+                module_details_id = database.get_module_id_given_module_code(course_code)
+                module_details = database.get_module_given_module_id(module_details_id)
+                exams = database.get_exam_list_given_module_id(module_details_id)
+                if exams == []:
+                    empty = True
+        if(course_code == "NULL"): #if button wasn't pressed, set course_code to first registered module
+            try: 
+                first_module = conn.execute("SELECT * FROM StudentModule WHERE StudentID=%s LIMIT 1", (session['studentid'])) #get first registered module
+                for row in first_module:
+                    first_moduleid = row[2] #get module id
+                module = conn.execute("SELECT ModuleCode FROM CourseModule WHERE ModuleID=%s", (first_moduleid)) #get module information
+                for row in module:
+                    course_code = row[0] #get module code i.e. COMP202
+                module_details_id = database.get_module_id_given_module_code(course_code)
+                module_details = database.get_module_given_module_id(module_details_id)
+                exams = database.get_exam_list_given_module_id(module_details_id)
+                if exams == []:
+                    empty = True
+            except:
+                module_details = None
+                exams = None
+                empty = True
+         
+        if(session['usertype'] == "student"):
+            return render_template("student/student-exams.html", modules=module_list, course_code=course_code, module_details=module_details, exams=exams, empty=empty)
+        elif(session['usertype'] == "courserep"):
+            return render_template("courserep/courserep-exams.html", modules=module_list, course_code=course_code, module_details=module_details, exams=exams, empty=empty)
+
+
+
+class NewExam(Form):
+    #variable names used in html
+    exam_name = TextField("")
+    exam_desc = TextField("")
+    exam_amount = IntegerField("")
+class NewQuestion(Form):
+    #variable names used in html
+    exam_latex = TextField("")
+    exam_solution = TextField("")
+@application.route("/create-exam/", methods=['GET', 'POST'])
+@login_required
+def create_exam():
+    if(session['usertype'] == "professor"):
+        if session.get('created_exam') != True:
+            module_id = database.get_module_id_given_module_code(session['exam_course_code'])
+            if session.get('create_exam_status') != True:
+                form = NewExam(request.form)
+                exam_name = ""
+                exam_desc = ""
+                exam_amount = 0
+                if request.method == "POST" and form.validate():
+                    exam_name = form.exam_name.data
+                    exam_desc = form.exam_desc.data
+                    exam_amount = form.exam_amount.data
+                    session['create_exam_status'] = True
+                    session['exam_name'] = exam_name
+                    session['exam_desc'] = exam_desc
+                    session['exam_amount'] = exam_amount
+                    database.create_exam(module_id, exam_name, exam_desc, 1)
+                    return redirect(url_for('create_exam'))
+                return render_template("professor/professor-create-exam.html", form=form, created=False)
+            else:
+                form = NewQuestion(request.form)
+                if request.method == "POST" and form.validate():
+                    exam_id = database.get_exam_id_given_module_id_title(module_id, session['exam_name'])
+                    latex_code = form.exam_latex.data
+                    solution_code = form.exam_solution.data
+                    database.create_question_template(latex_code, solution_code, 1, exam_id)
+                    session['created_exam'] = True
+                    return redirect(url_for('create_exam'))
+                return render_template("professor/professor-create-exam.html", form=form, created=True)
+        else:
+            session['create_exam_status'] = None
+            session['exam_name'] = None
+            session['exam_desc'] = None
+            session['exam_amount'] = None
+            return redirect(url_for('exams'))
+    else:
         return redirect(url_for('home'))
+
 
 #Student Results
 @application.route("/results/", methods=['GET', 'POST'])
 @login_required
 def results():
     if(session['usertype'] == "student"): #student results
-        return render_template("student/student-results.html")
+        exams_all = database.get_all_exams_given_student_id(session['studentid'])
+        return render_template("student/student-results.html", exams_all=exams_all)
     elif(session['usertype'] == "courserep"): #Course Rep results
         return render_template("courserep/courserep-results.html")
     elif(session['usertype'] == "admin"): #Admin results
@@ -350,6 +395,7 @@ class SettingsForm(Form):
 @application.route("/settings/", methods=['GET', 'POST'])
 @login_required
 def settings():
+    conn, trans = connect()
     form = SettingsForm(request.form)
     if request.method == "POST" and form.validate():
         if 'btn_reset' in request.form:
@@ -357,7 +403,23 @@ def settings():
             return redirect(url_for("settings"))
         elif 'btn_delete' in request.form:
             #Delete account
-            return redirect(url_for("settings"))
+            try:
+                if(session['usertype'] == "professor"): #Professor
+                    conn.execute("DELETE FROM Professor WHERE UserID=%s", (session['userid']))
+                    conn.execute("DELETE FROM User WHERE UserID=%s", (session['userid']))
+                    trans.commit()
+                    return redirect(url_for('logout'))
+                else: #Every other user
+                    conn.execute("DELETE FROM Answered WHERE UserID=%s", (session['userid']))
+                    conn.execute("DELETE FROM Cookies WHERE UserID=%s", (session['userid']))
+                    conn.execute("DELETE FROM Student WHERE UserID=%s", (session['userid']))
+                    conn.execute("DELETE FROM StudentModule WHERE StudentID=%s", (session['studentid']))
+                    conn.execute("DELETE FROM User WHERE UserID=%s", (session['userid']))
+                    trans.commit()
+                    return redirect(url_for('logout'))
+            except:
+                flash("Oops, something went wrong")
+                return redirect(url_for("settings"))
         elif 'btn_verification' in request.form:
             #Request verification
             return redirect(url_for("settings"))
@@ -389,23 +451,3 @@ def admin():
         return render_template("admin/admin-admin.html")
     else:
         return redirect(url_for('home'))
-    return render_template("courserep/courserep-course.html")
-
-@application.route("/quiz/", methods=['GET', 'POST'])
-@login_required
-def quiz():
-    render_template("student/take-quiz.html")
-    
-
-# this code should let the professor write questions to the db
-@app.route('/createQuestion', methods=['POST'])
-def my_form_post():
-    question = request.form['Question']
-    code = request.form['Code']
-    
-    from database import create_question_template
-
-    # TODO make it so user can choose whether question is enabled or disabled
-    create_question_template(question, code, True, 1)
-
-    return("Question created")

@@ -394,8 +394,18 @@ def admin():
 @application.route("/quiz/", methods=['GET', 'POST'])
 @login_required
 def quiz():
-    form = ModuleFormProfessor(request.form)
-    if request.method == "POST" and form.validate():
-        if 'course_code' in request.form: #Deleting a module
-module_code = form.course_code.data
+    render_template("student/take-quiz.html")
+    
 
+# this code should let the professor write questions to the db
+@app.route('/createQuestion', methods=['POST'])
+def my_form_post():
+    question = request.form['Question']
+    code = request.form['Code']
+    
+    from database import create_question_template
+
+    # TODO make it so user can choose whether question is enabled or disabled
+    create_question_template(question, code, True, 1)
+
+    return("Question created")

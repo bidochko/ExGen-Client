@@ -119,7 +119,13 @@ def create_question(user_id, question_template_id, correct):
 # Eg how many variables or a way to do it easily, will leave separate for now
 
 
-# def create_question_answered()
+def create_question_answered(user_id, question_id, correct):
+    answered_question = AnsweredQuestion()
+    answered_question.UserID = user_id
+    answered_question.QuestionID = question_id
+    answered_question.Correct = correct
+    db_session.add(answered_question)
+    db_session.commit()
 
 
 # Get Functions

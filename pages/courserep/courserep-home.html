@@ -50,12 +50,10 @@
             </thead>
             <tbody>
               {% for module in modules %}
-                {% for row in module %}
-                  <tr id={{ row[0] }}>
-                    <th scope="row"><p2>{{ row[3] }}</p2></th>
-                    <td><p2>{{ row[1] }}</p2></td>
-                  </tr>
-                {% endfor %}
+                <tr id={{ module.ModuleID }}>
+                  <th scope="row"><p2>{{ module.ModuleCode }}</p2></th>
+                  <td><p2>{{ module.ModuleName }}</p2></td>
+                </tr>
               {% endfor %}
             </tbody>
           </table>

@@ -25,6 +25,14 @@ p2 {
   font-size: 18px;
   text-align: left;
 }
+p3 {
+  font-family: 'Ubuntu';
+  font-style: normal;
+  font-weight: normal;
+  font-size: 18px;
+  line-height: normal;
+  text-align: center;
+}
 .menu {
   position: relative;
   margin-top: 0px;
@@ -213,4 +221,52 @@ input[type=text] {
   top: 50px;
   left: 50%;
   margin: 0px -83.5px;
+}
+.managers {
+  position: relative;
+  top: 150px;
+  text-align: left;
+  height: 300px;
+}
+.modules {
+  position: relative;
+  list-style-type: none;
+  text-align: center;
+  margin: 25px 0 0 0;
+  padding: 0;
+}
+.modules li {
+  float:left;
+  margin:0 5px 0 0;
+  width: 100px;
+  height:30px;
+  position:relative;
+}
+.modules label, .modules input {
+  display:block;
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+  bottom:0;
+}
+.modules input[type="radio"] {
+  opacity:0.01;
+  z-index:100;
+  width: 90;
+  height: 20px;
+}
+.modules input[type="radio"]:checked + label, .Checked + label {
+  background: #00A8A5;
+}
+.modules label {
+  padding: 5px;
+  border-radius: 5px 5px 5px 5px;
+  cursor:pointer;
+  z-index:90;
+}
+.information {
+  position: relative;
+  top: 30px;
+  left: -100px;
 }

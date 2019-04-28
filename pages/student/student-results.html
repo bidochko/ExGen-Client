@@ -30,5 +30,40 @@
         {% endfor %}
       {% endif %}
     {% endwith %}
+      
+    <div class="main" align="center">
+      <div class="registered">
+        <p2><b>Completed Exams</b></p2>
+        <div class="table-exams">
+          <table class="table" id="modules_reg">
+            <col width="173px" />
+            <col width="300px" />
+            <col width="100px" />
+            <thead>
+              <tr>
+                <th scope="col"><p2><b>Module Code</b></p2></th>
+                <th scope="col"><p2><b>Exam Name</b></p2></th>
+                <th scope="col"><p2><b>Exam Mark</b></p2></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for exam_module in exams_all %}
+                {% for exam in exam_module %}
+                  <tr id={{ exam.ExamID }}>
+                    <form id="report" name="report" class="report" action="/results/" method="POST">
+                      <th scope="row"><input id="report_id" name="report_id" type="text" value="{{ exam.ExamID }}" readonly="readonly"></input></th>
+                      <td><p2>{{ exam.Title }}</p2></td>
+                      <td><p3>0%</p3></td>
+                      <td><p2><button type="submit" class="report-button">Complete Report</button></p2></td>
+                    </form>
+                  </tr>
+                {% endfor %}
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
   </body>
 </html>

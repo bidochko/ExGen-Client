@@ -30,5 +30,68 @@
         {% endfor %}
       {% endif %}
     {% endwith %}
+
+    <div class="main" align="center">
+      <div class="registered">
+        <p2><b>Registered Modules</b></p2>
+        <div class="modules">
+          <form name="module_buttons_form" class="module_buttons_form" action="/exams/" method="POST">
+            {% if course_code == "NULL" %}
+              <p2><i>No modules registered</p2></i>
+            {% else %}
+              {% set course_name = '' %}
+              {% for module in modules %}
+                {% if course_code == module.ModuleCode %}
+                  {% set course_name = module.ModuleName %}
+                  <li>
+                    <input type="radio" name="module_buttons" onchange='this.form.submit();' id="{{ module.ModuleCode }}" value="{{ module.ModuleCode }}" checked="checked"></input>
+                    <label for="{{ module.ModuleCode }}"><p2>{{ module.ModuleCode }}</p2></label>
+                  </li>
+                {% else %}
+                  <li>
+                    <input type="radio" name="module_buttons" onchange='this.form.submit();' id="{{ module.ModuleCode }}" value="{{ module.ModuleCode }}"></input>
+                    <label for="{{ module.ModuleCode }}"><p2>{{ module.ModuleCode }}</p2></label>
+                  </li>
+                {% endif %}
+              {% endfor %}
+              <p3><b>{{ course_name }}</p3></b>
+            {% endif %}
+          </form>
+        </div>
+        <br>
+        <div class="details" align="center">
+          <p4><b>{{ module_details.ModuleName }}</b></p4>
+          <br>
+          {% if empty == False %}
+            <div class="table-exams">
+              <table class="table" id="modules">
+                <thead>
+                  <col width="100px" />
+                  <col width="200px" />
+                  <col width="70px" />
+                  <tr>
+                    <th scope="col"><p2><b>Exam ID</b></p2></th>
+                    <th scope="col"><p2><b>Exam Name</b></p2></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for exam in exams %}
+                    <tr id={{ exam.ExamID }}>
+                      <form id="take-exam-form" name="take-exam-form" class="take-exam-form" action="/exams/" method="POST">
+                        <th scope="row"><input id="take-exam" name="take-exam" type="text" value="{{ exam.ExamID }}" readonly="readonly"></input></th>
+                        <th scope="row"><p2>{{ exam.Title }}</p2></th>
+                        <td><p2><button type="submit" class="exam-button">Take Exam</button></p2></td>
+                      </form>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}
+            <p4><b><i>This module doesn't have any exams</p4></b></i>
+          {% endif %}
+        </div>
+      </div>
+    </div>
   </body>
 </html>

@@ -37,26 +37,30 @@
       </div>
       <div class="registered">
         <p2><b>Registered Modules</b></p2>
-        <div class="table-registered">
-          <table class="table" id="modules">
-            <thead>
-              <col width="110px" />
-              <col width="340px" />
-              <tr>
-                <th scope="col"><p2><b>Course code</b></p2></th>
-                <th scope="col"><p2><b>Course name</b></p2></th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for module in modules %}
-                <tr id={{ module.ModuleID }}>
-                  <th scope="row"><p2>{{ module.ModuleCode }}</p2></th>
-                  <td><p2>{{ module.ModuleName }}</p2></td>
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
+          <div class="table-registered">
+            {% if modules != [] %}
+              <table class="table" id="modules">
+                <thead>
+                  <col width="110px" />
+                  <col width="340px" />
+                  <tr>
+                    <th scope="col"><p2><b>Course code</b></p2></th>
+                    <th scope="col"><p2><b>Course name</b></p2></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for module in modules %}
+                    <tr id={{ module.ModuleID }}>
+                      <th scope="row"><p2>{{ module.ModuleCode }}</p2></th>
+                      <td><p2>{{ module.ModuleName }}</p2></td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+             {% else %}
+              <p3><i>No modules registered</i></p3>
+            {% endif %}
+          </div>
         <a href="/modules/"><button class="addmodules">Add module</button></a>
       </div>
     </div>

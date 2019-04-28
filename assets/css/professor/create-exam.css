@@ -150,94 +150,19 @@ img {
   width: 1000px;
   height: 400px;
 }
-.registered {
+.managed {
   position: relative;
-  top: 40px;
-  height: 300px;
+  top: 50px;
   text-align: left;
   height: auto;
 }
-.modules {
-  position: relative;
-  list-style-type: none;
-  text-align: center;
-  margin: 25px 0 0 0;
-  padding: 0;
-}
-.modules li {
-  float:left;
-  margin:0 5px 0 0;
-  width: 100px;
-  height:30px;
-  position:relative;
-}
-.modules label, .modules input {
-  display:block;
-  position:absolute;
-  top:0;
-  left:0;
-  right:0;
-  bottom:0;
-}
-.modules input[type="radio"] {
-  opacity:0.01;
-  z-index:100;
-}
-.modules input[type="radio"]:checked + label, .Checked + label {
-  background: #00A8A5;
-}
-.modules label {
-  padding: 5px;
-  border-radius: 5px 5px 5px 5px;
-  cursor:pointer;
-  z-index:90;
-}
-.exams-modules {
-  position: relative;
-  list-style-type: none;
-  text-align: center;
-  margin: 25px 0 0 0;
-  padding: 0;
-}
-.exams-modules li {
-  float:left;
-  margin:0 5px 0 0;
-  width: 100px;
-  height:30px;
-  position:relative;
-}
-.exams-modules label, .exams-modules input {
-  display:block;
-  position:absolute;
-  top:0;
-  left:0;
-  right:0;
-  bottom:0;
-}
-.exams-modules input[type="radio"] {
-  opacity:0.01;
-  z-index:100;
-}
-.exams-modules input[type="radio"]:checked + label, .Checked + label {
-  background: #00A8A5;
-}
-.exams-modules label {
-  padding: 5px;
-  border-radius: 5px 5px 5px 5px;
-  cursor:pointer;
-  z-index:90;
-}
-.details {
-  position: relative;
-  top: 50px;
-  width: 1000px;
-  float: left;
-}
-.table-exams {
+.table-managed {
   position: relative;
   top: 20px;
+  margin-left: -200px;
   float: center;
   width: 1000px;
+  left: 45%;
 }
 th {
   height:24px;
@@ -264,11 +189,11 @@ button {
   text-align: center;
   vertical-align: middle;
 }
-.exam-button {
+.delete-button {
   position: relative;
   left: 10px;
   font-family: 'Ubuntu';
-  width: 90px;
+  width: 70px;
   padding: 3px 0px;
   font-style: normal;
   font-weight: normal;
@@ -276,18 +201,63 @@ button {
   line-height: normal;
   text-align: center;
 }
+form[class=delete] {
+  height:0px;
+}
+form {
+  position: relative;
+  margin: 0px -175px;
+  left: 50%;
+}
 input[type=text] {
+  position: relative;
   background-color: transparent;
-  border: none;
-  width: 100px;
+  border: 2px solid #00A8A5;
+  border-radius: 5px;
+  width: 400px;
+  top: -22px;
+  left: 25px;
   font-family: 'Ubuntu';
   font-style: normal;
   font-weight: normal;
   font-size: 18px;
   line-height: normal;
+  text-align: left;
+}
+input[type=submit] {
+  position: relative;
+  background-color: #00A8A5;
+  border: none;
+  border-radius: 5px 5px 5px 5px;
+  top: 15px;
+  left: 120px;
+  color: black;
+  padding: 3px 25px;
+  font-family: 'Ubuntu';
+  font-style: normal;
+  font-weight: normal;
+  font-size: 20px;
+  line-height: normal;
+  text-align: center;
+  vertical-align: middle;
+}
+p3 {
+  position: relative;
+  font-family: 'Ubuntu';
+  font-style: normal;
+  font-weight: normal;
+  font-size: 18px;
+  text-align: right;
+  left: -150px;
   text-align: center;
 }
-.exams {
+.createmodule {
   position: relative;
+  width: 167px;
   top: 50px;
+  left: 50%;
+  margin: 0px -83.5px;
+}
+.description {
+  height: 150px;
 }

@@ -47,20 +47,80 @@
             </thead>
             <tbody>
               {% for module in modules_reg %}
-                {% for row in module %}
-                  <tr id={{ row[3] }}>
-                    <form id="delete" name="delete" class="delete" action="/modules/" method="POST">
-                      <th scope="row"><input id="course_code" name="course_code" type="text" value="{{ row[3] }}" readonly="readonly"></input></th>
-                      <td><p2>{{ row[1] }}</p2></td>
-                      <td><p2><button type="submit" class="delete-button">Delete</button></p2></td>
-                    </form>
-                  </tr>
-                {% endfor %}
+                <tr id={{ module.ModuleCode }}>
+                  <form id="delete" name="delete" class="delete" action="/modules/" method="POST">
+                    <th scope="row"><input id="course_code" name="course_code" type="text" value="{{ module.ModuleCode }}" readonly="readonly"></input></th>
+                    <td><p2>{{ module.ModuleName }}</p2></td>
+                    <td><p2><button type="submit" class="delete-button">Delete</button></p2></td>
+                  </form>
+                </tr>
               {% endfor %}
             </tbody>
           </table>
         </div>
         <a href="/create-module/"><button class="createmodule">Create module</button></a>
+      </div>
+      <div class="managers">
+        <p2><b>Course Professors</b></p2>
+        <div class="modules">
+          <form name="module_buttons_form" class="module_buttons_form" action="/modules/" method="POST">
+            {% if module_code_post == "NULL" %}
+              <p2><i>No modules registered</p2></i>
+            {% else %}
+              {% set course_name = '' %}
+              {% for module in modules_reg %}
+                {% if module_code_post == module.ModuleCode %}
+                  {% set course_name = module.ModuleName %}
+                  <li>
+                    <input type="radio" name="module_buttons" onchange='this.form.submit();' id="{{ module.ModuleCode }}" value="{{ module.ModuleCode }}" checked="checked"></input>
+                    <label for="{{ module.ModuleCode }}"><p2>{{ module.ModuleCode }}</p2></label>
+                  </li>
+                {% else %}
+                  <li>
+                    <input type="radio" name="module_buttons" onchange='this.form.submit();' id="{{ module.ModuleCode }}" value="{{ module.ModuleCode }}"></input>
+                    <label for="{{ module.ModuleCode }}"><p2>{{ module.ModuleCode }}</p2></label>
+                  </li>
+                {% endif %}
+              {% endfor %}
+              <p3><b>{{ course_name }}</p3></b>
+            {% endif %}
+          </form>
+        </div>
+        <br>
+        <div class="information" align="center">
+          {% for module in modules_reg %} 
+            {% if module.ModuleCode == module_code_post %}
+              <p3><b>{{ module.ModuleName }}</b></p3>
+            {% endif %}
+          {% endfor %}
+          <br>
+
+
+          <div class="table-registered">
+            <table class="table" id="modules_reg">
+              <col width="5px" />
+              <col width="200px" />
+              <col width="50px" />
+              <thead>
+                <tr>
+                  <th scope="col"></th>
+                  <th scope="col"><p2><b>Email</b></p2></th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for user in professors_list %}
+                  <tr id={{ user.UserID }}>
+                    <form id="professor-table" name="professor-table" class="professor-table" action="/modules/" method="POST">
+                      <th scope="row"><input id="professor_delete" name="professor_delete" type="text" value="{{ user.UserID }}" readonly="readonly"></input></th>
+                      <td><p2>{{ user.UserName }}</p2></td>
+                      <td><p2><button type="submit" class="opt-button">Remove</button></p2></td>
+                    </form>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   </body>
